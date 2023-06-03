@@ -2,9 +2,9 @@
 
 namespace Backend.Modules.Cities.Contract;
 
-public class CityValidator: AbstractValidator<City>
+public class CityRequestBodyValidator: AbstractValidator<CityRequestBody>
 {
-    public CityValidator()
+    public CityRequestBodyValidator()
     {
         RuleFor(city => city.Name).NotEmpty().NotNull();
     }

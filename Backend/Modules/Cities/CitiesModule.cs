@@ -10,6 +10,8 @@ using Serilog;
 
 using SerilogTimings;
 
+using Swashbuckle.AspNetCore.Annotations;
+
 
 namespace Backend.Modules.Cities;
 
@@ -27,6 +29,7 @@ public class CitiesModule : IModule {
     return endpoints;
   }
 
+  [SwaggerOperation(Summary = "Gets all available cities")]
   private static async Task<IResult> GetCitiesHandler([FromServices] ApplicationDbContext db) {
     using var op = Operation.Begin("Requesting cities");
     var cities = await db.Cities.ToListAsync();
@@ -35,8 +38,11 @@ public class CitiesModule : IModule {
     return TypedResults.Ok(cities);
   }
 
+  [SwaggerOperation(Summary = "Creates new city")]
+  [SwaggerResponse(201, "City was created successfully", typeof(City))]
+  [SwaggerResponse(400, "Invalid data was passed")]
   private static async Task<IResult> CreateCityHandler(
-    [FromBody] CityRequestBody city,
+    [FromBody] [SwaggerRequestBody(Description = "Name of the city to create", Required = true)] CityRequestBody city,
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<CityRequestBody> validator,
     [FromServices] Mappers mapper
@@ -49,14 +55,13 @@ public class CitiesModule : IModule {
       return TypedResults.BadRequest(result.Errors);
     }
 
-    using (var op = Operation.Begin("Saving new city"))
-    {
-      await db.Cities.AddAsync(mapper.Map(city));
-      await db.SaveChangesAsync();
-      op.Complete("City", city.Name);
+    using var op = Operation.Begin("Saving new city");
+    var entity = mapper.Map(city);
+    await db.Cities.AddAsync(entity);
+    await db.SaveChangesAsync();
+    op.Complete("City", city.Name);
 
-    }
     Log.Information("Added new city '{Name}'", city.Name);
-    return TypedResults.Created("/api/cities");
+    return TypedResults.Created("/api/cities", entity);
   }
 }

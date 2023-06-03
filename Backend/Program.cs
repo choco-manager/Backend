@@ -33,4 +33,23 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapEndpoints();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context = services.GetRequiredService<ApplicationDbContext>();
+
+    Log.Logger.Information("Checking if has pending migrations...");
+
+    if (context.Database.GetPendingMigrations().Any())
+    {
+        Log.Logger.Information(
+            "Found pending migrations: {0}, migrating...",
+            context.Database.GetPendingMigrations()
+        );
+        context.Database.Migrate();
+    }
+}
+
 app.Run();

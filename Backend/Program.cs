@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.Modules;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 
@@ -15,7 +16,10 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 builder.Services.RegisterModules();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v2", new OpenApiInfo { Title = "ChocoManager", Version = "v2" });
+});
 builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -26,7 +30,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options => { options.SwaggerEndpoint("v2/swagger.json", "ChocoManager v2"); });
 }
 
 app.UseSerilogRequestLogging();
@@ -45,9 +49,8 @@ using (var scope = app.Services.CreateScope())
     if (context.Database.GetPendingMigrations().Any())
     {
         Log.Logger.Information(
-            "Found pending migrations: {0}, migrating...",
-            context.Database.GetPendingMigrations()
-        );
+            "Found pending migrations: {GetPendingMigrations}, migrating...",
+            context.Database.GetPendingMigrations());
         context.Database.Migrate();
     }
 }

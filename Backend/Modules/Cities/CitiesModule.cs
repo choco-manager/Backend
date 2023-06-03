@@ -10,7 +10,8 @@ public class CitiesModule : IModule
 {
     public IServiceCollection RegisterModule(IServiceCollection builder)
     {
-        builder.AddSingleton<AbstractValidator<City>, CityValidator>();
+        builder.AddSingleton<AbstractValidator<CityRequestBody>, CityRequestBodyValidator>();
+        builder.AddSingleton<Mappers>();
         return builder;
     }
 
@@ -27,14 +28,15 @@ public class CitiesModule : IModule
         return TypedResults.Ok(await db.Cities.ToListAsync());
     }
 
-    private static async Task<IResult> CreateCityHandler([FromBody] City city, [FromServices] ApplicationDbContext db,
-        AbstractValidator<City> validator)
+    private static async Task<IResult> CreateCityHandler([FromBody] CityRequestBody city, [FromServices] ApplicationDbContext db,
+        [FromServices] AbstractValidator<CityRequestBody> validator, [FromServices] Mappers mapper)
     {
         var result = await validator.ValidateAsync(city);
 
         if (!result.IsValid) return TypedResults.BadRequest(result.Errors);
 
-        await db.Cities.AddAsync(city);
+        await db.Cities.AddAsync(mapper.Map(city));
+        await db.SaveChangesAsync();
         return TypedResults.Created("/api/cities");
     }
 }

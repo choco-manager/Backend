@@ -28,6 +28,7 @@ public partial class Program {
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options => {
       options.SwaggerDoc("v2", new OpenApiInfo { Title = "ChocoManager", Version = "v2" });
+      options.EnableAnnotations();
     });
     builder.Services.AddAuthorization();
 

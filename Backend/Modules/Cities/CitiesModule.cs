@@ -6,6 +6,10 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+using Serilog;
+
+using SerilogTimings;
+
 
 namespace Backend.Modules.Cities;
 
@@ -24,7 +28,11 @@ public class CitiesModule : IModule {
   }
 
   private static async Task<IResult> GetCitiesHandler([FromServices] ApplicationDbContext db) {
-    return TypedResults.Ok(await db.Cities.ToListAsync());
+    using var op = Operation.Begin("Requesting cities");
+    var cities = await db.Cities.ToListAsync();
+
+    Log.Information("Fetched {Count} cities", cities.Count);
+    return TypedResults.Ok(cities);
   }
 
   private static async Task<IResult> CreateCityHandler(
@@ -37,11 +45,18 @@ public class CitiesModule : IModule {
 
     if (!result.IsValid)
     {
+      Log.Warning("Validation was not successful: {Errors}", result.Errors);
       return TypedResults.BadRequest(result.Errors);
     }
 
-    await db.Cities.AddAsync(mapper.Map(city));
-    await db.SaveChangesAsync();
+    using (var op = Operation.Begin("Saving new city"))
+    {
+      await db.Cities.AddAsync(mapper.Map(city));
+      await db.SaveChangesAsync();
+      op.Complete("City", city.Name);
+
+    }
+    Log.Information("Added new city '{Name}'", city.Name);
     return TypedResults.Created("/api/cities");
   }
 }

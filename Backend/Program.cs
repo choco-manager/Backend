@@ -38,6 +38,9 @@ public partial class Program {
   }
 
   public static WebApplication CreateApplication(WebApplicationBuilder builder) {
+    var isRunningFromNUnit = 
+      AppDomain.CurrentDomain.GetAssemblies().Any(
+        a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
     var app = builder.Build();
 
     if (app.Environment.IsDevelopment())
@@ -51,21 +54,24 @@ public partial class Program {
     app.UseAuthorization();
     app.MapEndpoints();
 
-    using (var scope = app.Services.CreateScope())
+    if (isRunningFromNUnit)
     {
-      var services = scope.ServiceProvider;
+      return app;
+    }
 
-      var context = services.GetRequiredService<ApplicationDbContext>();
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
 
-      Log.Logger.Information("Checking if has pending migrations...");
+    var context = services.GetRequiredService<ApplicationDbContext>();
 
-      if (context.Database.GetPendingMigrations().Any())
-      {
-        Log.Logger.Information(
-          "Found pending migrations: {GetPendingMigrations}, migrating...",
-          context.Database.GetPendingMigrations());
-        context.Database.Migrate();
-      }
+    Log.Logger.Information("Checking if has pending migrations...");
+
+    if (context.Database.GetPendingMigrations().Any())
+    {
+      Log.Logger.Information(
+        "Found pending migrations: {GetPendingMigrations}, migrating...",
+        context.Database.GetPendingMigrations());
+      context.Database.Migrate();
     }
 
     return app;

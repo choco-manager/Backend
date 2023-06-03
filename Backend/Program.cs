@@ -17,44 +17,57 @@ Log.Logger = new LoggerConfiguration()
   .CreateLogger();
 
 builder.Host.UseSerilog();
-builder.Services.RegisterModules();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => {
-  options.SwaggerDoc("v2", new OpenApiInfo { Title = "ChocoManager", Version = "v2" });
-});
-builder.Services.AddAuthorization();
+ConfigureServices(builder);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-  options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+var app = CreateApplication(builder);
+app.Run();
 
-var app = builder.Build();
+public partial class Program {
+  public static WebApplicationBuilder ConfigureServices(WebApplicationBuilder builder) {
+    builder.Services.RegisterModules();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(options => {
+      options.SwaggerDoc("v2", new OpenApiInfo { Title = "ChocoManager", Version = "v2" });
+    });
+    builder.Services.AddAuthorization();
 
-if (app.Environment.IsDevelopment())
-{
-  app.UseSwagger();
-  app.UseSwaggerUI(options => { options.SwaggerEndpoint("v2/swagger.json", "ChocoManager v2"); });
-}
+    builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+      options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-app.UseSerilogRequestLogging();
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapEndpoints();
+    return builder;
+  }
 
-using (var scope = app.Services.CreateScope())
-{
-  var services = scope.ServiceProvider;
+  public static WebApplication CreateApplication(WebApplicationBuilder builder) {
+    var app = builder.Build();
 
-  var context = services.GetRequiredService<ApplicationDbContext>();
+    if (app.Environment.IsDevelopment())
+    {
+      app.UseSwagger();
+      app.UseSwaggerUI(options => { options.SwaggerEndpoint("v2/swagger.json", "ChocoManager v2"); });
+    }
 
-  Log.Logger.Information("Checking if has pending migrations...");
+    app.UseSerilogRequestLogging();
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapEndpoints();
 
-  if (context.Database.GetPendingMigrations().Any())
-  {
-    Log.Logger.Information(
-      "Found pending migrations: {GetPendingMigrations}, migrating...",
-      context.Database.GetPendingMigrations());
-    context.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+      var services = scope.ServiceProvider;
+
+      var context = services.GetRequiredService<ApplicationDbContext>();
+
+      Log.Logger.Information("Checking if has pending migrations...");
+
+      if (context.Database.GetPendingMigrations().Any())
+      {
+        Log.Logger.Information(
+          "Found pending migrations: {GetPendingMigrations}, migrating...",
+          context.Database.GetPendingMigrations());
+        context.Database.Migrate();
+      }
+    }
+
+    return app;
   }
 }
-
-app.Run();

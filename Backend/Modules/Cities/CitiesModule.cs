@@ -16,17 +16,18 @@ public class CitiesModule : IModule
 
     public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet(
-            "/api/cities",
-            async (ApplicationDbContext db) => TypedResults.Ok(await db.Cities.ToListAsync())
-        );
-
+        endpoints.MapGet("/api/cities", GetCitiesHandler);
         endpoints.MapPost("/api/cities", CreateCityHandler);
 
         return endpoints;
     }
 
-    private async Task<IResult> CreateCityHandler([FromBody] City city, ApplicationDbContext db,
+    private static async Task<IResult> GetCitiesHandler([FromServices] ApplicationDbContext db)
+    {
+        return TypedResults.Ok(await db.Cities.ToListAsync());
+    }
+
+    private static async Task<IResult> CreateCityHandler([FromBody] City city, [FromServices] ApplicationDbContext db,
         AbstractValidator<City> validator)
     {
         var result = await validator.ValidateAsync(city);

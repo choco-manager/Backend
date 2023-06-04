@@ -28,7 +28,14 @@ public partial class Program {
     builder.Services.RegisterModules();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options => {
-      options.SwaggerDoc("v2", new OpenApiInfo { Title = "ChocoManager", Version = "v2" });
+      options.SwaggerDoc("v2",
+        new OpenApiInfo {
+          Title = "ChocoManager", Version = "v2", Description = "Main API of ChocoManager project",
+          Contact = new OpenApiContact
+            { Name = "Daniil", Email = "me@dadyarri.ru", Url = new Uri("https://dadyarri.ru", UriKind.Absolute) },
+          License = new OpenApiLicense
+            { Name = "GNU GPLv3", Url = new Uri("https://choosealicense.com/licenses/gpl-3.0/", UriKind.Absolute) },
+        });
       options.EnableAnnotations();
     });
     builder.Services.AddAuthorization();

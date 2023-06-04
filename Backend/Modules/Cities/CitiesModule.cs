@@ -33,7 +33,7 @@ public class CitiesModule : IModule {
   private static async Task<IResult> GetCitiesHandler([FromServices] ApplicationDbContext db) {
     using var op = Operation.Begin("Requesting cities");
     var cities = await db.Cities.ToListAsync();
-
+    op.Complete();
     Log.Information("Fetched {Count} cities", cities.Count);
     return TypedResults.Ok(cities);
   }

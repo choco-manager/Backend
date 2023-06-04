@@ -24,7 +24,7 @@ var app = CreateApplication(builder);
 app.Run();
 
 public partial class Program {
-  public static WebApplicationBuilder ConfigureServices(WebApplicationBuilder builder) {
+  private static void ConfigureServices(WebApplicationBuilder builder) {
     builder.Services.RegisterModules();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options => {
@@ -43,11 +43,10 @@ public partial class Program {
     builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
       options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
     builder.Services.AddTransient<CheckPendingDatabaseChangesMiddleware>();
-
-    return builder;
+    builder.Services.AddTransient<GlobalErrorHandlingMiddleware>();
   }
 
-  public static WebApplication CreateApplication(WebApplicationBuilder builder) {
+  private static WebApplication CreateApplication(WebApplicationBuilder builder) {
     var isRunningFromNUnit =
       Array.Exists(AppDomain.CurrentDomain.GetAssemblies(),
         a => a.FullName?.ToLowerInvariant().StartsWith("nunit.framework") ?? false);
@@ -65,6 +64,7 @@ public partial class Program {
     app.MapEndpoints();
 
     app.UseMiddleware<CheckPendingDatabaseChangesMiddleware>();
+    app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
     if (isRunningFromNUnit)
     {

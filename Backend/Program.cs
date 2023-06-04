@@ -1,4 +1,5 @@
 using Backend.Data;
+using Backend.Middlewares;
 using Backend.Modules;
 
 using Microsoft.EntityFrameworkCore;
@@ -34,13 +35,14 @@ public partial class Program {
 
     builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
       options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+    builder.Services.AddTransient<CheckPendingDatabaseChangesMiddleware>();
 
     return builder;
   }
 
   public static WebApplication CreateApplication(WebApplicationBuilder builder) {
-    var isRunningFromNUnit = 
-      AppDomain.CurrentDomain.GetAssemblies().Any(
+    var isRunningFromNUnit =
+      Array.Exists(AppDomain.CurrentDomain.GetAssemblies(),
         a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
     var app = builder.Build();
 
@@ -54,6 +56,8 @@ public partial class Program {
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapEndpoints();
+
+    app.UseMiddleware<CheckPendingDatabaseChangesMiddleware>();
 
     if (isRunningFromNUnit)
     {

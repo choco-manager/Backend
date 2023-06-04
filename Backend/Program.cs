@@ -43,7 +43,7 @@ public partial class Program {
   public static WebApplication CreateApplication(WebApplicationBuilder builder) {
     var isRunningFromNUnit =
       Array.Exists(AppDomain.CurrentDomain.GetAssemblies(),
-        a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
+        a => a.FullName?.ToLowerInvariant().StartsWith("nunit.framework") ?? false);
     var app = builder.Build();
 
     if (app.Environment.IsDevelopment())

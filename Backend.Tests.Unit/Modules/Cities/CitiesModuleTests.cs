@@ -1,10 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
-using Backend.Data;
 using Backend.Modules.Cities.Contract;
-
-using DotNet.Testcontainers.Containers;
 
 using FluentAssertions;
 
@@ -19,7 +16,6 @@ namespace Backend.Tests.Unit.Modules.Cities;
 public class CitiesModuleTests {
   private HttpClient _client = null!;
   private IServiceScope _scope = null!;
-  private readonly IContainer _pgContainer = null!;
 
 
   [SetUp]

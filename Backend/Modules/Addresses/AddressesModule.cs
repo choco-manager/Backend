@@ -1,4 +1,25 @@
-﻿using System.Net;
+﻿// ------------------------------------------------------------------------
+// Copyright (C) 2023 dadyarri
+// This file is part of ChocoManager <https://github.com/choco-manager/Backend>.
+// 
+// ChocoManager is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// ChocoManager is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with ChocoManager.  If not, see <http://www.gnu.org/licenses/>.
+// ------------------------------------------------------------------------
+// 
+
+#region
+
+using System.Net;
 
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
@@ -14,6 +35,8 @@ using Serilog;
 using SerilogTimings;
 
 using Swashbuckle.AspNetCore.Annotations;
+
+#endregion
 
 
 namespace Backend.Modules.Addresses;
@@ -35,7 +58,6 @@ public class AddressesModule : IModule {
 
   [SwaggerOperation(Summary = "Gets all available addresses (with pagination)")]
   [SwaggerResponse(200, "Addresses was returned successfully", typeof(List<Address>))]
-
   private async Task<IResult> GetAddresses(
     [FromServices] ApplicationDbContext db,
     [FromQuery] int offset = 0,
@@ -61,9 +83,8 @@ public class AddressesModule : IModule {
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<CreateAddressRequestBody> validator
   ) {
-
     await validator.ValidateAndThrowAsync(body);
-    
+
     var city = await db.Cities.FirstOrDefaultAsync(city => city.Id == body.City);
     if (city is null)
     {
@@ -91,7 +112,6 @@ public class AddressesModule : IModule {
     await db.SaveChangesAsync();
 
     return TypedResults.Created("/api/addresses", createdAddress);
-
   }
 
   [SwaggerOperation(Summary = "Generates new fake addresses")]

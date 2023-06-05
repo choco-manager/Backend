@@ -29,6 +29,7 @@ public class CitiesModule : IModule {
   }
 
   [SwaggerOperation(Summary = "Gets all available cities")]
+  [SwaggerResponse(200, "Cities was returned successfully", typeof(List<City>))]
   private static async Task<IResult> GetCitiesHandler([FromServices] ApplicationDbContext db) {
     using var op = Operation.Begin("Requesting cities");
     var cities = await db.Cities.ToListAsync();
@@ -39,7 +40,7 @@ public class CitiesModule : IModule {
 
   [SwaggerOperation(Summary = "Creates new city")]
   [SwaggerResponse(201, "City was created successfully", typeof(City))]
-  [SwaggerResponse(400, "Invalid data was passed")]
+  [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
   private static async Task<IResult> CreateCityHandler(
     [FromBody] [SwaggerRequestBody(Description = "Name of the city to create", Required = true)] CityRequestBody city,
     [FromServices] ApplicationDbContext db,

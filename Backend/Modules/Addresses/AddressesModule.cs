@@ -13,6 +13,8 @@ using Serilog;
 
 using SerilogTimings;
 
+using Swashbuckle.AspNetCore.Annotations;
+
 
 namespace Backend.Modules.Addresses;
 
@@ -31,6 +33,9 @@ public class AddressesModule : IModule {
     return endpoints;
   }
 
+  [SwaggerOperation(Summary = "Gets all available addresses (with pagination)")]
+  [SwaggerResponse(200, "Addresses was returned successfully", typeof(List<Address>))]
+
   private async Task<IResult> GetAddresses(
     [FromServices] ApplicationDbContext db,
     [FromQuery] int offset = 0,
@@ -47,6 +52,10 @@ public class AddressesModule : IModule {
     return TypedResults.Ok(addresses);
   }
 
+  [SwaggerOperation(Summary = "Creates new address or gets existing one")]
+  [SwaggerResponse(200, "Found existing address with passed data, no address was created", typeof(Address))]
+  [SwaggerResponse(201, "Address was created successfully", typeof(Address))]
+  [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
   private async Task<IResult> CreateAddress(
     [FromBody] CreateAddressRequestBody body,
     [FromServices] ApplicationDbContext db,
@@ -85,6 +94,8 @@ public class AddressesModule : IModule {
 
   }
 
+  [SwaggerOperation(Summary = "Generates new fake addresses")]
+  [SwaggerResponse(201, "Addresses was created successfully", typeof(List<Address>))]
   private async Task<IResult> GenerateAddresses([FromServices] ApplicationDbContext db) {
     var generator = new GenerateAddresses();
     var addresses = await generator.Generate(db);

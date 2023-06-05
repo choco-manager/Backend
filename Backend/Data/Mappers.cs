@@ -7,5 +7,5 @@ namespace Backend.Data;
 
 [Mapper]
 public partial class Mappers {
-  public partial City Map(CityRequestBody city);
+  public partial City Map(CreateCityRequestBody city);
 }

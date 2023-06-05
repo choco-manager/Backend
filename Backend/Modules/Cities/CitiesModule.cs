@@ -17,7 +17,7 @@ namespace Backend.Modules.Cities;
 
 public class CitiesModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
-    builder.AddSingleton<AbstractValidator<CityRequestBody>, CityRequestBodyValidator>();
+    builder.AddSingleton<AbstractValidator<CreateCityRequestBody>, CityRequestBodyValidator>();
     return builder;
   }
 
@@ -42,9 +42,9 @@ public class CitiesModule : IModule {
   [SwaggerResponse(201, "City was created successfully", typeof(City))]
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
   private static async Task<IResult> CreateCityHandler(
-    [FromBody] [SwaggerRequestBody(Description = "Name of the city to create", Required = true)] CityRequestBody city,
+    [FromBody] [SwaggerRequestBody(Description = "Name of the city to create", Required = true)] CreateCityRequestBody city,
     [FromServices] ApplicationDbContext db,
-    [FromServices] AbstractValidator<CityRequestBody> validator,
+    [FromServices] AbstractValidator<CreateCityRequestBody> validator,
     [FromServices] Mappers mapper
   ) {
     await validator.ValidateAndThrowAsync(city);

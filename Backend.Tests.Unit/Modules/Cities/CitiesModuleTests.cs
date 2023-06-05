@@ -49,7 +49,7 @@ public class CitiesModuleTests {
     // Act
     var response = await _client.PostAsync(
       "/api/cities",
-      JsonContent.Create(new CityRequestBody { Name = "" })
+      JsonContent.Create(new CreateCityRequestBody { Name = "" })
     );
 
     // Assert
@@ -61,7 +61,7 @@ public class CitiesModuleTests {
     // Act
     var response = await _client.PostAsync(
       "/api/cities",
-      JsonContent.Create(new CityRequestBody { Name = "Москва" })
+      JsonContent.Create(new CreateCityRequestBody { Name = "Москва" })
     );
     
     // Assert

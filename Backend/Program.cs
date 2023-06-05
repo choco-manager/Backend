@@ -42,6 +42,8 @@ public partial class Program {
 
     builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
       options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+    builder.Services.AddSingleton<Mappers>();
+    
     builder.Services.AddTransient<CheckPendingDatabaseChangesMiddleware>();
     builder.Services.AddTransient<GlobalErrorHandlingMiddleware>();
   }

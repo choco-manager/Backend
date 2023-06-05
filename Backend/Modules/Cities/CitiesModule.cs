@@ -18,7 +18,6 @@ namespace Backend.Modules.Cities;
 public class CitiesModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
     builder.AddSingleton<AbstractValidator<CityRequestBody>, CityRequestBodyValidator>();
-    builder.AddSingleton<Mappers>();
     return builder;
   }
 

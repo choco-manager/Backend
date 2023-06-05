@@ -47,13 +47,7 @@ public class CitiesModule : IModule {
     [FromServices] AbstractValidator<CityRequestBody> validator,
     [FromServices] Mappers mapper
   ) {
-    var result = await validator.ValidateAsync(city);
-
-    if (!result.IsValid)
-    {
-      Log.Warning("Validation was not successful: {Errors}", result.Errors);
-      return TypedResults.BadRequest(result.Errors);
-    }
+    await validator.ValidateAndThrowAsync(city);
 
     using var op = Operation.Begin("Saving new city");
     var entity = mapper.Map(city);

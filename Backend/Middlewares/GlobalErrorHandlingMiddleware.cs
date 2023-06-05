@@ -2,6 +2,8 @@
 using System.Net.Mime;
 using System.Text.Json;
 
+using FluentValidation;
+
 using Microsoft.AspNetCore.Mvc;
 
 using Serilog;
@@ -14,6 +16,23 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
     try
     {
       await next(context);
+    }
+    catch (ValidationException e)
+    {
+      Log.Warning("Validation was failed with errors: {Errors}", e.Errors);
+
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.BadRequest,
+        Title = "Failed validation",
+        Detail = string.Join(", ",
+          e.Errors.Select(failure =>
+            $"Error in {failure.PropertyName}: {failure.ErrorMessage} (passed value '{failure.AttemptedValue}')")),
+      };
+
+      var json = JsonSerializer.Serialize(problemDetails);
+      context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+      await context.Response.WriteAsync(json);
     }
     catch (Exception e)
     {

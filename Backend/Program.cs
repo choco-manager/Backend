@@ -19,9 +19,13 @@
 
 #region
 
+using System.Net;
+
 using Backend.Data;
 using Backend.Middlewares;
 using Backend.Modules;
+
+using LettuceEncrypt;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -42,6 +46,24 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 ConfigureServices(builder);
+
+if (!builder.Environment.IsDevelopment())
+{
+  builder.Services
+    .AddLettuceEncrypt()
+    .PersistDataToDirectory(
+      new DirectoryInfo(builder.Configuration["Certificates:Path"]!),
+      builder.Configuration["Certificates:Password"]
+    );
+
+
+  builder.WebHost.UseKestrel(k => {
+    var appServices = k.ApplicationServices;
+    k.Listen(
+      IPAddress.Any, 443,
+      o => o.UseHttps(h => { h.UseLettuceEncrypt(appServices); }));
+  });
+}
 
 var app = CreateApplication(builder);
 app.Run();

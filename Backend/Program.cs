@@ -99,7 +99,7 @@ public partial class Program {
         a => a.FullName?.ToLowerInvariant().StartsWith("nunit.framework") ?? false);
     var app = builder.Build();
 
-    if (app.Environment.IsDevelopment())
+    if (!app.Environment.IsProduction())
     {
       app.UseSwagger();
       app.UseSwaggerUI(options => { options.SwaggerEndpoint("v2/swagger.json", "ChocoManager v2"); });

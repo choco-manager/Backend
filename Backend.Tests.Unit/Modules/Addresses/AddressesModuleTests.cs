@@ -21,9 +21,6 @@
 
 using System.Net;
 using System.Net.Http.Json;
-using System.Net.Mime;
-using System.Text;
-using System.Text.Json;
 
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
@@ -98,9 +95,7 @@ public class AddressesModuleTests {
     };
 
     // Act
-    var serialize = JsonSerializer.Serialize(rb);
-    var postResponse = await _client.PostAsync("/api/addresses",
-      new StringContent(serialize, Encoding.UTF8, MediaTypeNames.Application.Json));
+    var postResponse = await _client.PostAsync("/api/addresses", JsonContent.Create(rb));
     var postResult = await postResponse.Content.ReadFromJsonAsync<Address>();
 
     // Assert
@@ -124,9 +119,7 @@ public class AddressesModuleTests {
     };
 
     // Act
-    var serialize = JsonSerializer.Serialize(rb);
-    var postResponse = await _client.PostAsync("/api/addresses",
-      new StringContent(serialize, Encoding.UTF8, MediaTypeNames.Application.Json));
+    var postResponse = await _client.PostAsync("/api/addresses", JsonContent.Create(rb));
     var postResult = await postResponse.Content.ReadFromJsonAsync<Address>();
 
 

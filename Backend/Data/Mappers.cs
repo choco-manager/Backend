@@ -20,6 +20,7 @@
 #region
 
 using Backend.Modules.Cities.Contract;
+using Backend.Modules.MovementStatuses.Contract;
 
 using Riok.Mapperly.Abstractions;
 
@@ -31,4 +32,5 @@ namespace Backend.Data;
 [Mapper]
 public partial class Mappers {
   public partial City Map(CreateCityRequestBody city);
+  public partial MovementStatus Map(CreateMovementStatusRequestBody movementStatus);
 }

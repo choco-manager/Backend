@@ -45,6 +45,8 @@ public class ProductsModule : IModule {
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     endpoints.MapGet("/api/products", GetAllProducts).WithTags("Products API");
     endpoints.MapGet("/api/products/{id:guid}", GetProductDetails).WithTags("Products API");
+    endpoints.MapDelete("/api/products/{id:guid}", DeleteProduct).WithTags("Products API");
+    endpoints.MapPatch("/api/products/{id:guid}", RestoreProduct).WithTags("Products API");
 
     return endpoints;
   }
@@ -90,5 +92,29 @@ public class ProductsModule : IModule {
 
     Log.Information("Fetched product '{Name}'", product.Name);
     return TypedResults.Ok(mappers.Enhance(product, retailPrices, wholesalePrices));
+  }
+
+  private async Task<IResult> DeleteProduct(
+    [FromRoute] Guid id,
+    [FromServices] ApplicationDbContext db
+  ) {
+    using var op = Operation.Begin("Deleting product with Id = {Id}", id);
+    await db.Products.Where(p => p.Id == id).ForEachAsync(p => p.IsDeleted = true);
+    await db.SaveChangesAsync();
+    op.Complete();
+
+    return TypedResults.NoContent();
+  }
+
+  private async Task<IResult> RestoreProduct(
+    [FromRoute] Guid id,
+    [FromServices] ApplicationDbContext db
+  ) {
+    using var op = Operation.Begin("Restoring product with Id = {Id}", id);
+    await db.Products.Where(p => p.Id == id).ForEachAsync(p => p.IsDeleted = false);
+    await db.SaveChangesAsync();
+    op.Complete();
+
+    return TypedResults.Ok();
   }
 }

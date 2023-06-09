@@ -39,17 +39,17 @@ using Microsoft.EntityFrameworkCore;
 namespace Backend.Data;
 
 public class ApplicationDbContext : DbContext {
-  public DbSet<Address> Addresses => Set<Address>();
-  public DbSet<City> Cities => Set<City>();
-  public DbSet<Client> Clients => Set<Client>();
-  public DbSet<MovementItem> MovementItems => Set<MovementItem>();
-  public DbSet<MovementStatus> MovementStatuses => Set<MovementStatus>();
-  public DbSet<Order> Orders => Set<Order>();
-  public DbSet<PriceChange> PriceChanges => Set<PriceChange>();
-  public DbSet<PriceType> PriceTypes => Set<PriceType>();
-  public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
-  public DbSet<Product> Products => Set<Product>();
-  public DbSet<Shipment> Shipments => Set<Shipment>();
+  public virtual DbSet<Address> Addresses => Set<Address>();
+  public virtual DbSet<City> Cities => Set<City>();
+  public virtual DbSet<Client> Clients => Set<Client>();
+  public virtual DbSet<MovementItem> MovementItems => Set<MovementItem>();
+  public virtual DbSet<MovementStatus> MovementStatuses => Set<MovementStatus>();
+  public virtual DbSet<Order> Orders => Set<Order>();
+  public virtual DbSet<PriceChange> PriceChanges => Set<PriceChange>();
+  public virtual DbSet<PriceType> PriceTypes => Set<PriceType>();
+  public virtual DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+  public virtual DbSet<Product> Products => Set<Product>();
+  public virtual DbSet<Shipment> Shipments => Set<Shipment>();
 
   public ApplicationDbContext(DbContextOptions<ApplicationDbContext> contextOptions) : base(contextOptions) { }
 

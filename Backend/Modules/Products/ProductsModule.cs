@@ -45,8 +45,8 @@ public class ProductsModule : IModule {
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     endpoints.MapGet("/api/products", GetAllProducts).WithTags("Products API");
     endpoints.MapGet("/api/products/{id:guid}", GetProductDetails).WithTags("Products API");
-    endpoints.MapDelete("/api/products/{id:guid}", DeleteProduct).WithTags("Products API");
-    endpoints.MapPatch("/api/products/{id:guid}", RestoreProduct).WithTags("Products API");
+    endpoints.MapPost("/api/products/{id:guid}/delete", DeleteProduct).WithTags("Products API");
+    endpoints.MapPost("/api/trash/products/{id:guid}", RestoreProduct).WithTags("Products API");
 
     return endpoints;
   }

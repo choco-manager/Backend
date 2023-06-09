@@ -23,6 +23,8 @@ using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
 
+using Backend.Exceptions;
+
 using FluentValidation;
 
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +56,20 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
 
       var json = JsonSerializer.Serialize(problemDetails);
       context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+      await context.Response.WriteAsync(json);
+    }
+    catch (EntityWasNotFoundException e)
+    {
+      Log.Information("{Entity} with Id = {Id} was not found", e.Name, e.Id);
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.NotFound,
+        Title = $"{e.Name} was not found",
+        Detail = $"{e.Name} with Id = {e.Id} is not presented in the database",
+      };
+      var json = JsonSerializer.Serialize(problemDetails);
+
+      context.Response.StatusCode = (int)HttpStatusCode.NotFound;
       context.Response.ContentType = MediaTypeNames.Application.Json;
       await context.Response.WriteAsync(json);
     }

@@ -21,6 +21,7 @@
 
 using Backend.Modules.Cities.Contract;
 using Backend.Modules.MovementStatuses.Contract;
+using Backend.Modules.ProductCategories.Contract;
 
 using Riok.Mapperly.Abstractions;
 
@@ -33,4 +34,5 @@ namespace Backend.Data;
 public partial class Mappers {
   public partial City Map(CreateCityRequestBody city);
   public partial MovementStatus Map(CreateMovementStatusRequestBody movementStatus);
+  public partial ProductCategory Map(CreateProductCategoryRequestBody productCategory);
 }

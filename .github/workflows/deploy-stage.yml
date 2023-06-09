@@ -1,13 +1,17 @@
 name: "Deploy application to Docker Hub (staging)"
 
 on:
-  push:
+  workflow_run:
+    workflows: [".NET"]
     branches:
       - "master"
+    types:
+      - "completed"
   workflow_dispatch: {}
     
 jobs:
   build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: "Build & push services"
     runs-on: "ubuntu-latest"
     environment: "Staging"

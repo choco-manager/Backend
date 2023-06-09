@@ -119,7 +119,7 @@ public class ProductsModule : IModule {
     var product = await db.Products.FirstOrDefaultAsync(p => p.Id == id) ??
       throw new EntityWasNotFoundException(nameof(Product), id);
 
-    product.IsDeleted = false;
+    product.IsDeleted = true;
 
     await db.SaveChangesAsync();
     op.Complete();

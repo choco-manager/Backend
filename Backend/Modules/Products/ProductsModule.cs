@@ -55,6 +55,7 @@ public class ProductsModule : IModule {
     endpoints.MapPost("/api/products/{id:guid}/delete", DeleteProduct).WithTags("Products API");
     endpoints.MapPost("/api/trash/products/{id:guid}", RestoreProduct).WithTags("Products API");
     endpoints.MapPut("/api/products/{id:guid}", UpdateProduct).WithTags("Products API");
+    endpoints.MapPost("/api/products", CreateProduct).WithTags("Products API");
 
     return endpoints;
   }
@@ -192,5 +193,42 @@ public class ProductsModule : IModule {
     await db.SaveChangesAsync();
 
     return TypedResults.Ok(mappers.Map(product));
+  }
+
+  [SwaggerOperation(Summary = "Updates product")]
+  [SwaggerResponse(201, "Product was successfully created", typeof(ProductDto))]
+  [SwaggerResponse(400, "Invalid body", typeof(ProblemDetails))]
+  private async Task<IResult> CreateProduct(
+    [FromBody] UpdateProductRequestBody body,
+    [FromServices] ApplicationDbContext db,
+    [FromServices] AbstractValidator<UpdateProductRequestBody> validator
+  ) {
+    await validator.ValidateAndThrowAsync(body);
+
+    var product = new Product {
+      Name = body.Name,
+      Category = await db.ProductCategories.Where(pc => pc.Id == body.CategoryId).FirstAsync(),
+      WholesalePrice = body.WholesalePrice,
+      RetailPrice = body.RetailPrice,
+    };
+
+    await db.PriceChanges.AddRangeAsync(
+      new PriceChange {
+        Product = product,
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Retail),
+        Price = body.RetailPrice,
+        ChangeTimestamp = DateTime.UtcNow,
+      },
+      new PriceChange {
+        Product = product,
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Wholesale),
+        Price = body.WholesalePrice,
+        ChangeTimestamp = DateTime.UtcNow,
+      });
+    await db.Products.AddAsync(product);
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Created("/api/products", product);
   }
 }

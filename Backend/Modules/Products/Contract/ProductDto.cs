@@ -21,6 +21,7 @@
 namespace Backend.Modules.Products.Contract;
 
 public class ProductDto {
+  public Guid Id { get; set; }
   public required string Name { get; set; }
   public required Guid ProductCategoryId { get; set; }
   public bool IsByWeight { get; set; }

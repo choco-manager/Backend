@@ -32,6 +32,8 @@ using Serilog;
 
 using SerilogTimings;
 
+using Swashbuckle.AspNetCore.Annotations;
+
 #endregion
 
 
@@ -51,6 +53,8 @@ public class ProductsModule : IModule {
     return endpoints;
   }
 
+  [SwaggerOperation(Summary = "Gets all available products")]
+  [SwaggerResponse(200, "Products was returned successfully", typeof(List<Product>))]
   private async Task<IResult> GetAllProducts([FromServices] ApplicationDbContext db, [FromServices] Mappers mappers) {
     using var op = Operation.Begin("Requesting products");
     var products = await db.Products.Select(product => mappers.Map(product)).ToListAsync();
@@ -59,6 +63,9 @@ public class ProductsModule : IModule {
     return TypedResults.Ok(products);
   }
 
+  [SwaggerOperation(Summary = "Gets details of product")]
+  [SwaggerResponse(200, "Product details was returned successfully", typeof(Product))]
+  [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
   private async Task<IResult> GetProductDetails(
     [FromRoute] Guid id,
     [FromServices] ApplicationDbContext db,
@@ -94,6 +101,9 @@ public class ProductsModule : IModule {
     return TypedResults.Ok(mappers.Enhance(product, retailPrices, wholesalePrices));
   }
 
+  [SwaggerOperation(Summary = "Marks product as deleted")]
+  [SwaggerResponse(204, "Product was successfully marked as deleted")]
+  [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
   private async Task<IResult> DeleteProduct(
     [FromRoute] Guid id,
     [FromServices] ApplicationDbContext db
@@ -106,6 +116,9 @@ public class ProductsModule : IModule {
     return TypedResults.NoContent();
   }
 
+  [SwaggerOperation(Summary = "Marks product as not deleted")]
+  [SwaggerResponse(204, "Product was successfully marked as not deleted")]
+  [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
   private async Task<IResult> RestoreProduct(
     [FromRoute] Guid id,
     [FromServices] ApplicationDbContext db

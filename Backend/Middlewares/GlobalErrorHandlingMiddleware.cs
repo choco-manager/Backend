@@ -65,6 +65,8 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
         e.Message
       );
 
+      Log.Error(e.StackTrace!);
+
       var problemDetails = new ProblemDetails {
         Status = (int)HttpStatusCode.InternalServerError,
         Title = e.GetType().Name,

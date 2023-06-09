@@ -195,7 +195,7 @@ public class ProductsModule : IModule {
     return TypedResults.Ok(mappers.Map(product));
   }
 
-  [SwaggerOperation(Summary = "Updates product")]
+  [SwaggerOperation(Summary = "Creates product")]
   [SwaggerResponse(201, "Product was successfully created", typeof(ProductDto))]
   [SwaggerResponse(400, "Invalid body", typeof(ProblemDetails))]
   private async Task<IResult> CreateProduct(

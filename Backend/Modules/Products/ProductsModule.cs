@@ -45,7 +45,7 @@ namespace Backend.Modules.Products;
 public class ProductsModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
     builder.AddSingleton<AbstractValidator<UpdateProductRequestBody>, UpdateProductRequestBodyValidator>();
-    
+
     return builder;
   }
 
@@ -115,7 +115,11 @@ public class ProductsModule : IModule {
     [FromServices] ApplicationDbContext db
   ) {
     using var op = Operation.Begin("Deleting product with Id = {Id}", id);
-    await db.Products.Where(p => p.Id == id).ForEachAsync(p => p.IsDeleted = true);
+    var product = await db.Products.FirstOrDefaultAsync(p => p.Id == id) ??
+      throw new EntityWasNotFoundException(nameof(Product), id);
+
+    product.IsDeleted = false;
+
     await db.SaveChangesAsync();
     op.Complete();
 
@@ -130,7 +134,11 @@ public class ProductsModule : IModule {
     [FromServices] ApplicationDbContext db
   ) {
     using var op = Operation.Begin("Restoring product with Id = {Id}", id);
-    await db.Products.Where(p => p.Id == id).ForEachAsync(p => p.IsDeleted = false);
+    var product = await db.Products.FirstOrDefaultAsync(p => p.Id == id) ??
+      throw new EntityWasNotFoundException(nameof(Product), id);
+
+    product.IsDeleted = false;
+
     await db.SaveChangesAsync();
     op.Complete();
 

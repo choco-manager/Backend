@@ -21,7 +21,9 @@
 
 using Backend.Modules.Cities.Contract;
 using Backend.Modules.MovementStatuses.Contract;
+using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.ProductCategories.Contract;
+using Backend.Modules.Products.Contract;
 
 using Riok.Mapperly.Abstractions;
 
@@ -35,4 +37,22 @@ public partial class Mappers {
   public partial City Map(CreateCityRequestBody city);
   public partial MovementStatus Map(CreateMovementStatusRequestBody movementStatus);
   public partial ProductCategory Map(CreateProductCategoryRequestBody productCategory);
+
+  [MapProperty(nameof(Product.Category.Id), nameof(ProductDto.ProductCategoryId))]
+  public partial ProductDto Map(Product product);
+
+  public ProductDetails Enhance(
+    Product product,
+    List<PriceChange> retailPrices,
+    List<PriceChange> wholesalePrices
+  ) {
+    var dto = Enhance(product);
+
+    dto.RetailPriceChanges = retailPrices;
+    dto.WholesalePriceChanges = wholesalePrices;
+
+    return dto;
+  }
+
+  private partial ProductDetails Enhance(Product product);
 }

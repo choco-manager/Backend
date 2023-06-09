@@ -41,6 +41,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Backend.Modules.Addresses;
 
+[SwaggerTag("Operations related to addresses")]
 public class AddressesModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
     builder.AddSingleton<AbstractValidator<CreateAddressRequestBody>, CreateAddressRequestBodyValidator>();
@@ -49,9 +50,9 @@ public class AddressesModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/addresses", GetAddresses);
-    endpoints.MapPost("/api/addresses", CreateAddress);
-    endpoints.MapPut("/api/addresses", GenerateAddresses);
+    endpoints.MapGet("/api/addresses", GetAddresses).WithTags("Addresses API");
+    endpoints.MapPost("/api/addresses", CreateAddress).WithTags("Addresses API");
+    endpoints.MapPut("/api/addresses", GenerateAddresses).WithTags("Addresses API");
 
     return endpoints;
   }

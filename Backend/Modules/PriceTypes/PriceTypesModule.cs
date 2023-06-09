@@ -43,7 +43,7 @@ public class PriceTypesModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/priceTypes", GetAllPriceTypesHandler);
+    endpoints.MapGet("/api/priceTypes", GetAllPriceTypesHandler).WithTags("Price Types API");
 
     return endpoints;
   }

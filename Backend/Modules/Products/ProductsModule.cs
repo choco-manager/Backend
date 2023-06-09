@@ -22,8 +22,11 @@
 
 using Backend.Data;
 using Backend.Exceptions;
+using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.PriceTypes.Contract;
 using Backend.Modules.Products.Contract;
+
+using FluentValidation;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +44,8 @@ namespace Backend.Modules.Products;
 
 public class ProductsModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
+    builder.AddSingleton<AbstractValidator<UpdateProductRequestBody>, UpdateProductRequestBodyValidator>();
+    
     return builder;
   }
 
@@ -49,6 +54,7 @@ public class ProductsModule : IModule {
     endpoints.MapGet("/api/products/{id:guid}", GetProductDetails).WithTags("Products API");
     endpoints.MapPost("/api/products/{id:guid}/delete", DeleteProduct).WithTags("Products API");
     endpoints.MapPost("/api/trash/products/{id:guid}", RestoreProduct).WithTags("Products API");
+    endpoints.MapPut("/api/products/{id:guid}", UpdateProduct).WithTags("Products API");
 
     return endpoints;
   }
@@ -129,5 +135,54 @@ public class ProductsModule : IModule {
     op.Complete();
 
     return TypedResults.Ok();
+  }
+
+  [SwaggerOperation(Summary = "Updates product")]
+  [SwaggerResponse(200, "Product was successfully updated", typeof(ProductDto))]
+  [SwaggerResponse(400, "Invalid body", typeof(ProblemDetails))]
+  [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
+  private async Task<IResult> UpdateProduct(
+    [FromRoute] Guid id,
+    [FromBody] UpdateProductRequestBody body,
+    [FromServices] ApplicationDbContext db,
+    [FromServices] Mappers mappers,
+    [FromServices] AbstractValidator<UpdateProductRequestBody> validator
+  ) {
+    await validator.ValidateAndThrowAsync(body);
+
+    var product = await db.Products
+      .Include(p => p.Category)
+      .Where(p => p.Id == id)
+      .FirstOrDefaultAsync() ?? throw new EntityWasNotFoundException(nameof(Product), id);
+
+    if (body.WholesalePrice != product.WholesalePrice)
+    {
+      product.WholesalePrice = body.WholesalePrice;
+      await db.PriceChanges.AddAsync(new PriceChange {
+        ChangeTimestamp = DateTime.UtcNow,
+        Price = body.WholesalePrice,
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Wholesale),
+        Product = product,
+      });
+    }
+
+    if (body.RetailPrice != product.RetailPrice)
+    {
+      product.RetailPrice = body.RetailPrice;
+      await db.PriceChanges.AddAsync(new PriceChange {
+        ChangeTimestamp = DateTime.UtcNow,
+        Price = body.RetailPrice,
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Retail),
+        Product = product,
+      });
+    }
+
+    product.Name = body.Name;
+    product.IsByWeight = body.IsByWeight;
+    product.VkMarketId = body.VkMarketId;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok(mappers.Map(product));
   }
 }

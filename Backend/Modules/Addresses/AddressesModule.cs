@@ -64,7 +64,7 @@ public class AddressesModule : IModule {
     [FromQuery] int offset = 0,
     [FromQuery] int count = 5
   ) {
-    using var op = Operation.Begin("Requesting cities");
+    using var op = Operation.Begin("Requesting addresses");
     var addresses = await db.Addresses
       .Skip(offset)
       .Take(count)

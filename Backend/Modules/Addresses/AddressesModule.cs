@@ -52,7 +52,7 @@ public class AddressesModule : IModule {
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     endpoints.MapGet("/api/addresses", GetAddresses).WithTags("Addresses API");
     endpoints.MapPost("/api/addresses", CreateAddress).WithTags("Addresses API");
-    endpoints.MapPut("/api/addresses", GenerateAddresses).WithTags("Addresses API");
+    endpoints.MapPut("/api/addresses/fake", GenerateAddresses).WithTags("Addresses API");
 
     return endpoints;
   }

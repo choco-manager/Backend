@@ -20,6 +20,7 @@
 #region
 
 using Backend.Modules.Cities.Contract;
+using Backend.Modules.Clients.Contract;
 using Backend.Modules.MovementStatuses.Contract;
 using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.ProductCategories.Contract;
@@ -40,6 +41,8 @@ public partial class Mappers {
 
   [MapProperty(nameof(Product.Category.Id), nameof(ProductDto.ProductCategoryId))]
   public partial ProductDto Map(Product product);
+
+  public partial ClientDto Map(Client client);
 
   public ProductDetails Enhance(
     Product product,

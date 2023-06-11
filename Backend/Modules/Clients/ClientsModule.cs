@@ -23,6 +23,7 @@
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
 using Backend.Exceptions;
+using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Clients.Contract;
 
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,7 @@ public class ClientsModule : IModule {
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     endpoints.MapGet("/api/clients", GetClients).WithTags("Clients API");
     endpoints.MapGet("/api/clients/{id:guid}", GetClientDetails).WithTags("Clients API");
+    endpoints.MapPut("/api/clients/{id:guid}", UpdateClient).WithTags("Clients API");
     endpoints.MapPut("/api/clients/fake", GenerateFakeClients).WithTags("Clients API");
 
     return endpoints;
@@ -96,11 +98,68 @@ public class ClientsModule : IModule {
     return TypedResults.Ok(client);
   }
 
+  [SwaggerOperation(Summary = "Updates client")]
+  [SwaggerResponse(200, "Client was updated successfully", typeof(Client))]
+  [SwaggerResponse(404, "Client was not found", typeof(ProblemDetails))]
+  private async Task<IResult> UpdateClient(
+    [FromRoute] Guid id,
+    [FromBody] UpdateClientRequestBody body,
+    [FromServices] ApplicationDbContext db,
+    [FromServices] Mappers mappers
+  ) {
+    using var clientOp = Operation.Begin("Requesting client with Id = {Id}", id);
+    var client = await db.Clients
+      .Where(c => c.Id == id)
+      .Include(c => c.Addresses)
+      .ThenInclude(a => a.City)
+      .FirstOrDefaultAsync();
+    clientOp.Complete();
+
+    if (client is null)
+    {
+      throw new EntityWasNotFoundException(nameof(Client), id);
+    }
+
+    var shortenClient = mappers.CutToRb(client);
+
+    var newAddressesList = CalculateDeltaOfAddresses(shortenClient.Addresses, body.Addresses);
+
+    var addresses = new List<Address>();
+
+    foreach (var newAddressId in newAddressesList)
+    {
+      var address = await db.Addresses.FindAsync(newAddressId);
+
+      if (address is not null)
+      {
+        addresses.Add(address);
+      }
+    }
+
+    client.FirstName = body.FirstName;
+    client.LastName = body.LastName;
+    client.ChatLink = body.ChatLink;
+    client.PhoneNumber = body.PhoneNumber;
+    client.Addresses = addresses;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok(client);
+  }
+
   [SwaggerOperation(Summary = "Generates fake clients")]
   [SwaggerResponse(201, "Clients was generated successfully", typeof(List<Client>))]
   private async Task<IResult> GenerateFakeClients([FromServices] ApplicationDbContext db) {
     var generator = new GenerateClients();
     var clients = await generator.Generate(db);
     return TypedResults.Created("/api/clients", clients);
+  }
+
+  private List<Guid> CalculateDeltaOfAddresses(List<Guid> oldAddresses, List<Guid> newAddresses) {
+    var secondHashSet = new HashSet<Guid>(newAddresses);
+    var deltaList = oldAddresses.Where(item => secondHashSet.Contains(item)).ToList();
+    deltaList.AddRange(newAddresses.Where(item => !oldAddresses.Contains(item)));
+
+    return deltaList;
   }
 }

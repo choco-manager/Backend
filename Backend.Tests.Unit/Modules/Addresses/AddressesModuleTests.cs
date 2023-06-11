@@ -58,7 +58,7 @@ public class AddressesModuleTests {
     "Method to generate random addresses should return status code 201 and list of generated addresses")]
   public async Task PutAddresses__Returns201() {
     // Act
-    var response = await _client.PutAsync("/api/addresses", null);
+    var response = await _client.PutAsync("/api/addresses/fake", null);
     var addresses = await response.Content.ReadFromJsonAsync<List<Address>>();
 
     // Assert

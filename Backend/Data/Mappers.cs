@@ -19,6 +19,7 @@
 
 #region
 
+using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
 using Backend.Modules.Clients.Contract;
 using Backend.Modules.MovementStatuses.Contract;
@@ -58,4 +59,10 @@ public partial class Mappers {
   public partial ProductDto Cut(Product product);
 
   public partial ClientDto Cut(Client client);
+
+  public partial UpdateClientRequestBody CutToRb(Client client);
+
+  private Guid AddressToGuid(Address address) {
+    return address.Id;
+  }
 }

@@ -22,6 +22,7 @@
 
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
+using Backend.Exceptions;
 using Backend.Modules.Clients.Contract;
 
 using Microsoft.AspNetCore.Mvc;
@@ -45,13 +46,14 @@ public class ClientsModule : IModule {
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     endpoints.MapGet("/api/clients", GetClients).WithTags("Clients API");
+    endpoints.MapGet("/api/clients/{id:guid}", GetClientDetails).WithTags("Clients API");
     endpoints.MapPut("/api/clients/fake", GenerateFakeClients).WithTags("Clients API");
 
     return endpoints;
   }
 
   [SwaggerOperation(Summary = "Gets all available clients (with pagination)")]
-  [SwaggerResponse(200, "Clients was returned successfully", typeof(List<Client>))]
+  [SwaggerResponse(200, "Clients was returned successfully", typeof(List<ClientDto>))]
   private async Task<IResult> GetClients(
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
@@ -68,6 +70,30 @@ public class ClientsModule : IModule {
     op.Complete();
     Log.Information("Fetched {Count} clients", addresses.Count);
     return TypedResults.Ok(addresses);
+  }
+
+  [SwaggerOperation(Summary = "Gets detail of client")]
+  [SwaggerResponse(200, "Client was returned successfully", typeof(Client))]
+  [SwaggerResponse(404, "Client was not found", typeof(ProblemDetails))]
+  private async Task<IResult> GetClientDetails(
+    [FromRoute] Guid id,
+    [FromServices] ApplicationDbContext db
+  ) {
+    using var clientOp = Operation.Begin("Requesting client with Id = {Id}", id);
+    var client = await db.Clients
+      .Where(c => c.Id == id)
+      .Include(c => c.Addresses)
+      .ThenInclude(a => a.City)
+      .FirstOrDefaultAsync();
+    clientOp.Complete();
+
+    if (client is null)
+    {
+      throw new EntityWasNotFoundException(nameof(Client), id);
+    }
+
+    Log.Information("Fetched client '{FirstName} {LastName}'", client.FirstName, client.LastName);
+    return TypedResults.Ok(client);
   }
 
   [SwaggerOperation(Summary = "Generates fake clients")]

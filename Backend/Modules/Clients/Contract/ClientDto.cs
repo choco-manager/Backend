@@ -21,6 +21,7 @@
 namespace Backend.Modules.Clients.Contract;
 
 public class ClientDto {
+  public Guid Id { get; set; }
   public required string FirstName { get; set; }
   public string? LastName { get; set; }
   public string? PhoneNumber { get; set; }

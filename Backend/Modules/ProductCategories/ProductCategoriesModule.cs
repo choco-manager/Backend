@@ -75,7 +75,7 @@ public class ProductCategoriesModule : IModule {
     await validator.ValidateAndThrowAsync(body);
 
     using var op = Operation.Begin("Saving new product category");
-    var entity = mapper.Map(body);
+    var entity = mapper.Enhance(body);
     await db.ProductCategories.AddAsync(entity);
     await db.SaveChangesAsync();
     op.Complete("Product category", body.Name);

@@ -74,7 +74,7 @@ public class CitiesModule : IModule {
     await validator.ValidateAndThrowAsync(city);
 
     using var op = Operation.Begin("Saving new city");
-    var entity = mapper.Map(city);
+    var entity = mapper.Enhance(city);
     await db.Cities.AddAsync(entity);
     await db.SaveChangesAsync();
     op.Complete("City", city.Name);

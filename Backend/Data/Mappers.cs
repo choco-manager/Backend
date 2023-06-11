@@ -35,14 +35,9 @@ namespace Backend.Data;
 
 [Mapper]
 public partial class Mappers {
-  public partial City Map(CreateCityRequestBody city);
-  public partial MovementStatus Map(CreateMovementStatusRequestBody movementStatus);
-  public partial ProductCategory Map(CreateProductCategoryRequestBody productCategory);
-
-  [MapProperty(nameof(Product.Category.Id), nameof(ProductDto.ProductCategoryId))]
-  public partial ProductDto Map(Product product);
-
-  public partial ClientDto Map(Client client);
+  public partial City Enhance(CreateCityRequestBody city);
+  public partial MovementStatus Enhance(CreateMovementStatusRequestBody movementStatus);
+  public partial ProductCategory Enhance(CreateProductCategoryRequestBody productCategory);
 
   public ProductDetails Enhance(
     Product product,
@@ -58,4 +53,9 @@ public partial class Mappers {
   }
 
   private partial ProductDetails Enhance(Product product);
+
+  [MapProperty(nameof(Product.Category.Id), nameof(ProductDto.ProductCategoryId))]
+  public partial ProductDto Cut(Product product);
+
+  public partial ClientDto Cut(Client client);
 }

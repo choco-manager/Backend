@@ -65,7 +65,7 @@ public class ClientsModule : IModule {
       .OrderBy(c => c.LastName)
       .Skip(offset)
       .Take(count)
-      .Select(c => mappers.Map(c))
+      .Select(c => mappers.Cut(c))
       .ToListAsync();
     op.Complete();
     Log.Information("Fetched {Count} clients", addresses.Count);

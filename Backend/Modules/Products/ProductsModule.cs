@@ -64,7 +64,7 @@ public class ProductsModule : IModule {
   [SwaggerResponse(200, "Products was returned successfully", typeof(List<Product>))]
   private async Task<IResult> GetAllProducts([FromServices] ApplicationDbContext db, [FromServices] Mappers mappers) {
     using var op = Operation.Begin("Requesting products");
-    var products = await db.Products.Select(product => mappers.Map(product)).ToListAsync();
+    var products = await db.Products.Select(product => mappers.Cut(product)).ToListAsync();
     op.Complete();
     Log.Information("Fetched {Count} products", products.Count);
     return TypedResults.Ok(products);
@@ -192,7 +192,7 @@ public class ProductsModule : IModule {
 
     await db.SaveChangesAsync();
 
-    return TypedResults.Ok(mappers.Map(product));
+    return TypedResults.Ok(mappers.Cut(product));
   }
 
   [SwaggerOperation(Summary = "Creates product")]

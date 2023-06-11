@@ -77,7 +77,7 @@ public class MovementStatusesModule : IModule {
     await validator.ValidateAndThrowAsync(movementStatus);
 
     using var op = Operation.Begin("Saving new movement status");
-    var entity = mapper.Map(movementStatus);
+    var entity = mapper.Enhance(movementStatus);
     await db.MovementStatuses.AddAsync(entity);
     await db.SaveChangesAsync();
     op.Complete("Movement status", movementStatus.Name);

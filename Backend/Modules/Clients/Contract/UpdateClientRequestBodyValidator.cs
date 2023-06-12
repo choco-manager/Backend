@@ -31,8 +31,7 @@ public class UpdateClientRequestBodyValidator : AbstractValidator<UpdateClientRe
   public UpdateClientRequestBodyValidator() {
     RuleFor(b => b.FirstName).NotEmpty().NotNull();
     RuleFor(b => b.LastName).NotEmpty().NotNull();
-    RuleFor(b => b.ChatLink)
-      .Matches("https?://(www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_+.~#?&//=]*)");
+    RuleFor(b => b.ChatLink).Must(link => Uri.TryCreate(link, UriKind.Absolute, out _));
     RuleForEach(b => b.Addresses).NotEmpty().NotNull().NotEqual(Guid.Empty);
   }
 }

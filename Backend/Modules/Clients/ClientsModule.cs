@@ -26,6 +26,8 @@ using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Clients.Contract;
 
+using FluentValidation;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,6 +44,8 @@ namespace Backend.Modules.Clients;
 
 public class ClientsModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
+    builder.AddSingleton<AbstractValidator<UpdateClientRequestBody>, UpdateClientRequestBodyValidator>();
+    
     return builder;
   }
 
@@ -105,8 +109,11 @@ public class ClientsModule : IModule {
     [FromRoute] Guid id,
     [FromBody] UpdateClientRequestBody body,
     [FromServices] ApplicationDbContext db,
-    [FromServices] Mappers mappers
+    [FromServices] Mappers mappers,
+    [FromServices] AbstractValidator<UpdateClientRequestBody> validator
   ) {
+    await validator.ValidateAndThrowAsync(body);
+    
     using var clientOp = Operation.Begin("Requesting client with Id = {Id}", id);
     var client = await db.Clients
       .Where(c => c.Id == id)

@@ -54,6 +54,7 @@ public class ClientsModule : IModule {
     endpoints.MapGet("/api/clients/{id:guid}", GetClientDetails).WithTags("Clients API");
     endpoints.MapPut("/api/clients/{id:guid}", UpdateClient).WithTags("Clients API");
     endpoints.MapPut("/api/clients/fake", GenerateFakeClients).WithTags("Clients API");
+    endpoints.MapPost("/api/clients", CreateClient).WithTags("Clients API");
 
     return endpoints;
   }
@@ -100,6 +101,40 @@ public class ClientsModule : IModule {
 
     Log.Information("Fetched client '{FirstName} {LastName}'", client.FirstName, client.LastName);
     return TypedResults.Ok(client);
+  }
+
+  [SwaggerOperation(Summary = "Creates client")]
+  private async Task<IResult> CreateClient(
+    [FromBody] UpdateClientRequestBody body,
+    [FromServices] ApplicationDbContext db,
+    [FromServices] AbstractValidator<UpdateClientRequestBody> validator
+  ) {
+    await validator.ValidateAndThrowAsync(body);
+
+    var addresses = new List<Address>();
+
+    foreach (var addressId in body.Addresses)
+    {
+      var address = await db.Addresses.FindAsync(addressId);
+
+      if (address is not null)
+      {
+        addresses.Add(address);
+      }
+    }
+
+    var client = new Client {
+      FirstName = body.FirstName,
+      LastName = body.LastName,
+      ChatLink = body.ChatLink,
+      PhoneNumber = body.PhoneNumber,
+      Addresses = addresses,
+    };
+
+    await db.Clients.AddAsync(client);
+    await db.SaveChangesAsync();
+
+    return TypedResults.Created("/api/clients", client);
   }
 
   [SwaggerOperation(Summary = "Updates client")]

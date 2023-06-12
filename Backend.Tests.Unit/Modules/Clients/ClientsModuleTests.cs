@@ -84,18 +84,19 @@ public class ClientsModuleTests {
   [Test(Description = "Method to create new client should return status code 201 and created client")]
   public async Task CreateClient__Returns201() {
     // Act
-    var response = await _client.PostAsync("/api/clients", JsonContent.Create(new UpdateClientRequestBody {
-      FirstName = "John",
-      LastName = "Doe",
-      ChatLink = "https://vk.com/gim1234567_1",
-      PhoneNumber = "(678) 673-34-23",
-      Addresses = new List<Guid>(),
-    }));
+    var response = await _client.PostAsync("/api/clients",
+      JsonContent.Create(new UpdateClientRequestBody {
+        FirstName = "John",
+        LastName = "Doe",
+        ChatLink = "https://vk.com/gim1234567_1",
+        PhoneNumber = "(678) 673-34-23",
+        Addresses = new List<Guid>(),
+      }));
 
-    var client = await response.Content.ReadFromJsonAsync<ClientDto>();
+    var client = await response.Content.ReadFromJsonAsync<Client>();
 
     // Assert
-    response.StatusCode.Should().Be(HttpStatusCode.OK);
+    response.StatusCode.Should().Be(HttpStatusCode.Created);
     client.Should().NotBeNull();
   }
 

@@ -155,7 +155,7 @@ public class ClientsModule : IModule {
     return TypedResults.Created("/api/clients", clients);
   }
 
-  private List<Guid> CalculateDeltaOfAddresses(List<Guid> oldAddresses, List<Guid> newAddresses) {
+  public static List<Guid> CalculateDeltaOfAddresses(List<Guid> oldAddresses, List<Guid> newAddresses) {
     var secondHashSet = new HashSet<Guid>(newAddresses);
     var deltaList = oldAddresses.Where(item => secondHashSet.Contains(item)).ToList();
     deltaList.AddRange(newAddresses.Where(item => !oldAddresses.Contains(item)));

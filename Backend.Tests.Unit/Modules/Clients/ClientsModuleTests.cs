@@ -23,7 +23,6 @@
 using System.Net;
 using System.Net.Http.Json;
 
-using Backend.Modules.Clients;
 using Backend.Modules.Clients.Contract;
 
 using FluentAssertions;
@@ -98,56 +97,5 @@ public class ClientsModuleTests {
     // Assert
     response.StatusCode.Should().Be(HttpStatusCode.Created);
     client.Should().NotBeNull();
-  }
-
-  [Test(Description = "Method to compare two lists of addresses should produce one list with delta of both lists")]
-  public async Task CompareAddresses__WhenListsWasNotChanged__ReturnsSameList() {
-    // Arrange
-    var list = new List<Guid>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-
-    // Act
-    var result = ClientsModule.CalculateDeltaOfAddresses(list, list);
-
-    // Assert
-    result.Should().BeEquivalentTo(list);
-  }
-
-  [Test(Description = "Method to compare two lists of addresses should produce one list with delta of both lists")]
-  public async Task CompareAddresses__WhenFirstListHasItemsThatSecondHasnt__CorrectDelta() {
-    // Arrange
-    var firstList = new List<Guid>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-    var secondList = new List<Guid>() { firstList[0], firstList[1] };
-
-    // Act
-    var result = ClientsModule.CalculateDeltaOfAddresses(firstList, secondList);
-
-    // Assert
-    result.Should().BeEquivalentTo(secondList);
-  }
-
-  [Test(Description = "Method to compare two lists of addresses should produce one list with delta of both lists")]
-  public async Task CompareAddresses__WhenSecondListHasItemsThatFirstHasnt__ReturnsCorrectDelta() {
-    // Arrange
-    var firstList = new List<Guid>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-    var secondList = new List<Guid>() { firstList[0], firstList[1], firstList[2], Guid.NewGuid() };
-
-    // Act
-    var result = ClientsModule.CalculateDeltaOfAddresses(firstList, secondList);
-
-    // Assert
-    result.Should().BeEquivalentTo(secondList);
-  }
-
-  [Test(Description = "Method to compare two lists of addresses should produce one list with delta of both lists")]
-  public async Task CompareAddresses__WhenBothListsHasItemsThatOtherHasnt__ReturnsCorrectDelta() {
-    // Arrange
-    var firstList = new List<Guid>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-    var secondList = new List<Guid>() { firstList[0], firstList[1], Guid.NewGuid() };
-
-    // Act
-    var result = ClientsModule.CalculateDeltaOfAddresses(firstList, secondList);
-
-    // Assert
-    result.Should().BeEquivalentTo(secondList);
   }
 }

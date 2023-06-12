@@ -25,6 +25,7 @@ using Backend.Data.FakeDataGeneration;
 using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Clients.Contract;
+using Backend.Modules.Clients.Utils;
 
 using FluentValidation;
 
@@ -45,6 +46,7 @@ namespace Backend.Modules.Clients;
 public class ClientsModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
     builder.AddSingleton<AbstractValidator<UpdateClientRequestBody>, UpdateClientRequestBodyValidator>();
+    builder.AddSingleton<ClientUtils>();
     
     return builder;
   }
@@ -145,7 +147,8 @@ public class ClientsModule : IModule {
     [FromBody] UpdateClientRequestBody body,
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
-    [FromServices] AbstractValidator<UpdateClientRequestBody> validator
+    [FromServices] AbstractValidator<UpdateClientRequestBody> validator,
+    [FromServices] ClientUtils utils
   ) {
     await validator.ValidateAndThrowAsync(body);
     
@@ -164,7 +167,7 @@ public class ClientsModule : IModule {
 
     var shortenClient = mappers.CutToRb(client);
 
-    var newAddressesList = CalculateDeltaOfAddresses(shortenClient.Addresses, body.Addresses);
+    var newAddressesList = utils.GetDeltaOfGuidLists(shortenClient.Addresses, body.Addresses);
 
     var addresses = new List<Address>();
 
@@ -195,13 +198,5 @@ public class ClientsModule : IModule {
     var generator = new GenerateClients();
     var clients = await generator.Generate(db);
     return TypedResults.Created("/api/clients", clients);
-  }
-
-  public static List<Guid> CalculateDeltaOfAddresses(List<Guid> oldAddresses, List<Guid> newAddresses) {
-    var secondHashSet = new HashSet<Guid>(newAddresses);
-    var deltaList = oldAddresses.Where(item => secondHashSet.Contains(item)).ToList();
-    deltaList.AddRange(newAddresses.Where(item => !oldAddresses.Contains(item)));
-
-    return deltaList;
   }
 }

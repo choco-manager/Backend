@@ -22,10 +22,13 @@
 
 using Backend.Data;
 using Backend.Data.DateRange;
+using Backend.Exceptions;
 using Backend.Modules.Orders.Contract;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
+using SerilogTimings;
 
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -41,6 +44,8 @@ public class OrdersModule : IModule {
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     endpoints.MapGet("/api/orders", GetOrders).WithTags("Orders API");
+    endpoints.MapGet("/api/orders/{id:guid}", GetOrdersDetails).WithTags("Orders API");
+    
     return endpoints;
   }
 
@@ -85,5 +90,24 @@ public class OrdersModule : IModule {
     }
 
     return TypedResults.Ok(orders);
+  }
+
+  [SwaggerOperation(Summary = "Gets detail of order")]
+  [SwaggerResponse(200, "Order was returned successfully", typeof(Order))]
+  [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
+  private async Task<IResult> GetOrdersDetails([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+    using var op = Operation.Begin("Requesting order with Id = {Id}", id);
+    var order = await db.Orders
+        .Include(o => o.Client)
+        .Include(o => o.Items)
+        .ThenInclude(i => i.Product)
+        .Include(o => o.SelectedAddress)
+        .ThenInclude(a => a.City)
+        .FirstOrDefaultAsync(o => o.Id == id) ??
+      throw new EntityWasNotFoundException(nameof(Order), id);
+
+    op.Complete();
+
+    return TypedResults.Ok(order);
   }
 }

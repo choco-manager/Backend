@@ -23,6 +23,7 @@ using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
 using Backend.Modules.Clients.Contract;
 using Backend.Modules.MovementStatuses.Contract;
+using Backend.Modules.Orders.Contract;
 using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.ProductCategories.Contract;
 using Backend.Modules.Products.Contract;
@@ -60,9 +61,15 @@ public partial class Mappers {
 
   public partial ClientDto Cut(Client client);
 
+  public partial OrderDto Cut(Order order);
+
   public partial UpdateClientRequestBody CutToRb(Client client);
 
   private Guid AddressToGuid(Address address) {
     return address.Id;
+  }
+
+  private string AddressToReadableAddress(Address address) {
+    return $"г. {address.City.Name}, {address.Street}, {address.Building}";
   }
 }

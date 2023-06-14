@@ -29,4 +29,6 @@ public class ProductDto {
   public int VkMarketId { get; set; }
   public int RetailPrice { get; set; }
   public int WholesalePrice { get; set; }
+
+  // TODO: Add leftover (decimal)
 }

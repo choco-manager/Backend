@@ -18,7 +18,8 @@ jobs:
       - name: "Extract version number from tag"
         id: version-extractor
         run: |
-          echo "VERSION=$(xmlstarlet sel -t -m '//Version[1]' -v . -n < Backend/Backend.csproj) >> $GITHUB_OUTPUT"
+          "export VERSION=$(xmlstarlet sel -t -m '//Version[1]' -v . -n < Backend/Backend.csproj)"
+          echo "VERSION=$VERSION >> $GITHUB_OUTPUT"
       - name: Create tag
         uses: rickstaa/action-create-tag@v1
         id: "tag_create"

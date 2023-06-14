@@ -28,7 +28,7 @@ using Backend.Modules.MovementItems.Contract;
 namespace Backend.Modules.MovementItems.Utils;
 
 public static class MovementItemsUtils {
-  public static List<MovementItem> CompareTo(
+  public static List<MovementItem> GetDifferencesFrom(
     this IEnumerable<MovementItem> oldList,
     IEnumerable<MovementItem> newList
   ) {

@@ -1,0 +1,20 @@
+{
+    "template": "## Список изменений\n\n#{{CHANGELOG}}",
+    "pr_template": "- #${{NUMBER}} ${{TITLE}} (@${{AUTHOR}})",
+    "output_file": "CHANGELOG.md",
+    "empty_template": "**без изменений**",
+    "categories": [
+        {
+            "title": "## Новый функционал",
+            "labels": ["feature"]
+        },
+        {
+            "title": "## Исправления",
+            "labels": ["fix"]
+        }
+    ],
+    "sort": {
+        "order": "ASC",
+        "on_property": "mergedAt"
+    }
+}

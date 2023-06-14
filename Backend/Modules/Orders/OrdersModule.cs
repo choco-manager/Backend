@@ -26,6 +26,7 @@ using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Clients.Contract;
 using Backend.Modules.MovementItems.Contract;
+using Backend.Modules.MovementItems.Utils;
 using Backend.Modules.MovementStatuses.Contract;
 using Backend.Modules.Orders.Contract;
 using Backend.Modules.Products.Contract;
@@ -225,8 +226,8 @@ public class OrdersModule : IModule {
       });
     }
 
-    // TODO: Add calculating delta
-    // order.Items = items;
+    // TODO: Add calculating diff
+    var diff = order.Items.GetDifferencesFrom(items);
 
     await db.SaveChangesAsync();
 

@@ -16,16 +16,15 @@ jobs:
       - name: "Install XPath engine"
         run: "sudo apt install xmlstarlet -y"
       - name: "Extract version number from tag"
-        id: version-extractor
+        id: versionExtractor
         run: |
-          "export VERSION=$(xmlstarlet sel -t -m '//Version[1]' -v . -n < Backend/Backend.csproj)"
-          echo "VERSION=$VERSION >> $GITHUB_OUTPUT"
+          echo "VERSION=$(xmlstarlet sel -t -m '//Version[1]' -v . -n < Backend/Backend.csproj)" >> $GITHUB_OUTPUT
       - name: Create tag
         uses: rickstaa/action-create-tag@v1
         id: "tag_create"
         with:
-          tag: ${{ steps.version-extractor.outputs.VERSION }}
-          message: "Release ${{ steps.version-extractor.outputs.VERSION }}"
+          tag: ${{ steps.versionExtractor.outputs.VERSION }}
+          message: "Release ${{ steps.versionExtractor.outputs.VERSION }}"
       - name: Generate Changelog
         uses: mikepenz/release-changelog-builder-action@v4
         with:
@@ -36,7 +35,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v${{ steps.version-extractor.outputs.VERSION }}"
+          automatic_release_tag: "v${{ steps.versionExtractor.outputs.VERSION }}"
           prerelease: false
-          title: "Релиз v${{ steps.version-extractor.outputs.VERSION }}"
+          title: "Релиз v${{ steps.versionExtractor.outputs.VERSION }}"
           body_path: CHANGELOG.md

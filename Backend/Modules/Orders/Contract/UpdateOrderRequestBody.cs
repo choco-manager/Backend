@@ -33,5 +33,4 @@ public class UpdateOrderRequestBody {
   public List<UpdateMovementItem> Items { get; set; }
   public Guid ClientId { get; set; }
   public Guid SelectedAddressId { get; set; }
-  public bool IsDeleted { get; set; }
 }

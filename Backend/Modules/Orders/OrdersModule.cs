@@ -56,6 +56,7 @@ public class OrdersModule : IModule {
     endpoints.MapPost("/api/orders", CreateOrder).WithTags("Orders API");
     endpoints.MapPost("/api/orders/{id:guid}/delete", MarkOrderAsDeleted).WithTags("Orders API");
     endpoints.MapPost("/api/trash/orders/{id:guid}", MarkOrderAsNotDeleted).WithTags("Orders API");
+    endpoints.MapPut("/api/orders/{id:guid}", UpdateOrder).WithTags("Orders API");
     
     return endpoints;
   }
@@ -190,5 +191,45 @@ public class OrdersModule : IModule {
     await db.SaveChangesAsync();
 
     return TypedResults.Ok();
+  }
+
+  [SwaggerOperation(Summary = "Updates order")]
+  [SwaggerResponse(200, "Order was updated successfully", typeof(Order))]
+  [SwaggerResponse(404, "Some entity was not found", typeof(ProblemDetails))]
+  private async Task<IResult> UpdateOrder(
+    [FromServices] ApplicationDbContext db,
+    [FromRoute] Guid id,
+    [FromBody] UpdateOrderRequestBody body
+  ) {
+    var order = await db.Orders.FindAsync(id) ??
+      throw new EntityWasNotFoundException(nameof(Order), id);
+
+    order.Date = body.Date;
+    order.Status = await db.MovementStatuses.FindAsync(body.MovementStatusId) ??
+      throw new EntityWasNotFoundException(nameof(MovementStatus), body.MovementStatusId);
+
+    order.Client = await db.Clients.FindAsync(body.ClientId) ??
+      throw new EntityWasNotFoundException(nameof(Client), body.ClientId);
+
+    order.SelectedAddress = await db.Addresses.FindAsync(body.SelectedAddressId) ??
+      throw new EntityWasNotFoundException(nameof(Address), body.SelectedAddressId);
+
+    var items = new List<MovementItem>();
+
+    foreach (var item in body.Items)
+    {
+      items.Add(new MovementItem {
+        Amount = item.Amount,
+        Product = await db.Products.FindAsync(item.ProductId) ??
+          throw new EntityWasNotFoundException(nameof(Product), item.ProductId),
+      });
+    }
+
+    // TODO: Add calculating delta
+    // order.Items = items;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok(order);
   }
 }

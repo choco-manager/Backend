@@ -36,6 +36,7 @@ jobs:
             ENVIRONMENT=Staging
 
   deploy:
+    needs: build
     name: "Deploy new build on stage server"
     runs-on: ubuntu-latest
     environment: "Staging"

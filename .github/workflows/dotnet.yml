@@ -24,6 +24,7 @@ jobs:
       run: dotnet build --no-restore Backend/Backend.csproj
       
   test:
+    needs: build
     name: "Run tests"
     runs-on: ubuntu-latest
     steps:

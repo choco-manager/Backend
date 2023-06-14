@@ -54,6 +54,8 @@ public class OrdersModule : IModule {
     endpoints.MapGet("/api/orders", GetOrders).WithTags("Orders API");
     endpoints.MapGet("/api/orders/{id:guid}", GetOrdersDetails).WithTags("Orders API");
     endpoints.MapPost("/api/orders", CreateOrder).WithTags("Orders API");
+    endpoints.MapPost("/api/orders/{id:guid}/delete", MarkOrderAsDeleted).WithTags("Orders API");
+    endpoints.MapPost("/api/trash/orders/{id:guid}", MarkOrderAsNotDeleted).WithTags("Orders API");
     
     return endpoints;
   }
@@ -160,5 +162,33 @@ public class OrdersModule : IModule {
     op.Complete();
 
     return TypedResults.Created("/api/orders", order);
+  }
+
+  [SwaggerOperation(Summary = "Marks order as deleted")]
+  [SwaggerResponse(204, "Order was marked as deleted successfully")]
+  [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
+  private async Task<IResult> MarkOrderAsDeleted([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+    var order = await db.Orders.FindAsync(id) ??
+      throw new EntityWasNotFoundException(nameof(Order), id);
+
+    order.IsDeleted = true;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.NoContent();
+  }
+
+  [SwaggerOperation(Summary = "Marks order as not deleted")]
+  [SwaggerResponse(200, "Order was returned from trash successfully")]
+  [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
+  private async Task<IResult> MarkOrderAsNotDeleted([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+    var order = await db.Orders.FindAsync(id) ??
+      throw new EntityWasNotFoundException(nameof(Order), id);
+
+    order.IsDeleted = false;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok();
   }
 }

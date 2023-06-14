@@ -23,7 +23,14 @@
 using Backend.Data;
 using Backend.Data.DateRange;
 using Backend.Exceptions;
+using Backend.Modules.Addresses.Contract;
+using Backend.Modules.Clients.Contract;
+using Backend.Modules.MovementItems.Contract;
+using Backend.Modules.MovementStatuses.Contract;
 using Backend.Modules.Orders.Contract;
+using Backend.Modules.Products.Contract;
+
+using FluentValidation;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,12 +46,14 @@ namespace Backend.Modules.Orders;
 
 public class OrdersModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
+    builder.AddSingleton<AbstractValidator<UpdateOrderRequestBody>, UpdateOrderRequestBodyValidator>();
     return builder;
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     endpoints.MapGet("/api/orders", GetOrders).WithTags("Orders API");
     endpoints.MapGet("/api/orders/{id:guid}", GetOrdersDetails).WithTags("Orders API");
+    endpoints.MapPost("/api/orders", CreateOrder).WithTags("Orders API");
     
     return endpoints;
   }
@@ -109,5 +118,47 @@ public class OrdersModule : IModule {
     op.Complete();
 
     return TypedResults.Ok(order);
+  }
+
+  [SwaggerOperation(Summary = "Creates new order")]
+  [SwaggerResponse(201, "Order was created successfully", typeof(Order))]
+  [SwaggerResponse(404, "Some entity was not found", typeof(ProblemDetails))]
+  private static async Task<IResult> CreateOrder(
+    [FromServices] ApplicationDbContext db,
+    [FromServices] AbstractValidator<UpdateOrderRequestBody> validator,
+    [FromBody] UpdateOrderRequestBody body
+  ) {
+    await validator.ValidateAndThrowAsync(body);
+
+    using var op = Operation.Begin("Creating new order");
+    var items = new List<MovementItem>();
+
+    foreach (var item in body.Items)
+    {
+      items.Add(new MovementItem {
+        Amount = item.Amount,
+        Product = await db.Products.FindAsync(item.ProductId) ??
+          throw new EntityWasNotFoundException(nameof(Product), item.ProductId),
+      });
+    }
+
+    var order = new Order {
+      Date = body.Date,
+      Status = await db.MovementStatuses.FindAsync(body.MovementStatusId) ??
+        throw new EntityWasNotFoundException(nameof(MovementStatus), body.MovementStatusId),
+      Client = await db.Clients.FindAsync(body.ClientId) ??
+        throw new EntityWasNotFoundException(nameof(Client), body.ClientId),
+      SelectedAddress = await db.Addresses.FindAsync(body.SelectedAddressId) ??
+        throw new EntityWasNotFoundException(nameof(Address), body.SelectedAddressId),
+      IsDeleted = false,
+      Items = items,
+    };
+
+    await db.Orders.AddAsync(order);
+    await db.SaveChangesAsync();
+
+    op.Complete();
+
+    return TypedResults.Created("/api/orders", order);
   }
 }

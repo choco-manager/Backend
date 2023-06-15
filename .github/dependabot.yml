@@ -4,3 +4,8 @@ updates:
     directory: "/Backend"
     schedule:
       interval: "daily"
+  - package-ecosystem: "nuget"
+    directory: "/Backend.Tests.Unit"
+    schedule:
+      interval: "daily"
+

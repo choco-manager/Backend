@@ -170,7 +170,8 @@ public class ProductsModule : IModule {
       await db.PriceChanges.AddAsync(new PriceChange {
         ChangeTimestamp = DateTime.UtcNow,
         Price = body.WholesalePrice,
-        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Wholesale),
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Wholesale) ??
+          throw new EntityWasNotFoundException(nameof(PriceType), PriceTypeEnum.Wholesale),
         Product = product,
       });
     }
@@ -181,7 +182,8 @@ public class ProductsModule : IModule {
       await db.PriceChanges.AddAsync(new PriceChange {
         ChangeTimestamp = DateTime.UtcNow,
         Price = body.RetailPrice,
-        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Retail),
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Retail) ??
+          throw new EntityWasNotFoundException(nameof(PriceType), PriceTypeEnum.Retail),
         Product = product,
       });
     }
@@ -215,13 +217,15 @@ public class ProductsModule : IModule {
     await db.PriceChanges.AddRangeAsync(
       new PriceChange {
         Product = product,
-        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Retail),
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Retail) ??
+          throw new EntityWasNotFoundException(nameof(PriceType), PriceTypeEnum.Retail),
         Price = body.RetailPrice,
         ChangeTimestamp = DateTime.UtcNow,
       },
       new PriceChange {
         Product = product,
-        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Wholesale),
+        PriceType = await db.PriceTypes.FindAsync(PriceTypeEnum.Wholesale) ??
+          throw new EntityWasNotFoundException(nameof(PriceType), PriceTypeEnum.Wholesale),
         Price = body.WholesalePrice,
         ChangeTimestamp = DateTime.UtcNow,
       });

@@ -64,7 +64,16 @@ public class ProductsModule : IModule {
   [SwaggerResponse(200, "Products was returned successfully", typeof(List<Product>))]
   private async Task<IResult> GetAllProducts([FromServices] ApplicationDbContext db, [FromServices] Mappers mappers) {
     using var op = Operation.Begin("Requesting products");
-    var products = await db.Products.Select(product => mappers.Cut(product)).ToListAsync();
+    var products = await db.Products.Select(product => mappers.Cut(product, 0)).ToListAsync();
+
+    foreach (var product in products)
+    {
+      product.Leftover = await db.MovementItems
+        .Include(mi => mi.Product)
+        .Where(mi => mi.Product.Id == product.Id)
+        .SumAsync(mi => mi.Amount);
+    }
+    
     op.Complete();
     Log.Information("Fetched {Count} products", products.Count);
     return TypedResults.Ok(products);
@@ -104,8 +113,17 @@ public class ProductsModule : IModule {
       .ToListAsync();
     pricesOp.Complete();
 
+    using var leftoverOp = Operation.Begin("Calculating leftover");
+
+    var leftover = await db.MovementItems
+      .Include(mi => mi.Product)
+      .Where(mi => mi.Product.Id == product.Id)
+      .SumAsync(mi => mi.Amount);
+
+    leftoverOp.Complete();
+
     Log.Information("Fetched product '{Name}'", product.Name);
-    return TypedResults.Ok(mappers.Enhance(product, retailPrices, wholesalePrices));
+    return TypedResults.Ok(mappers.Enhance(product, retailPrices, wholesalePrices, leftover));
   }
 
   [SwaggerOperation(Summary = "Marks product as deleted")]
@@ -194,7 +212,12 @@ public class ProductsModule : IModule {
 
     await db.SaveChangesAsync();
 
-    return TypedResults.Ok(mappers.Cut(product));
+    var leftover = await db.MovementItems
+      .Include(mi => mi.Product)
+      .Where(mi => mi.Product.Id == product.Id)
+      .SumAsync(mi => mi.Amount);
+
+    return TypedResults.Ok(mappers.Cut(product, leftover));
   }
 
   [SwaggerOperation(Summary = "Creates product")]

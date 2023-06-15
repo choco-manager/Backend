@@ -44,20 +44,30 @@ public partial class Mappers {
   public ProductDetails Enhance(
     Product product,
     List<PriceChange> retailPrices,
-    List<PriceChange> wholesalePrices
+    List<PriceChange> wholesalePrices,
+    decimal leftover
   ) {
     var dto = Enhance(product);
 
     dto.RetailPriceChanges = retailPrices;
     dto.WholesalePriceChanges = wholesalePrices;
+    dto.Leftover = leftover;
 
     return dto;
   }
 
   private partial ProductDetails Enhance(Product product);
 
+  public ProductDto Cut(Product product, decimal leftover) {
+    var dto = Cut(product);
+
+    dto.Leftover = leftover;
+
+    return dto;
+  }
+
   [MapProperty(nameof(Product.Category.Id), nameof(ProductDto.ProductCategoryId))]
-  public partial ProductDto Cut(Product product);
+  private partial ProductDto Cut(Product product);
 
   public partial ClientDto Cut(Client client);
 

@@ -38,4 +38,5 @@ public class ProductDetails {
   public bool IsByWeight { get; set; }
   public bool IsDeleted { get; set; }
   public int VkMarketId { get; set; }
+  public decimal Leftover { get; set; }
 }

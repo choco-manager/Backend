@@ -30,5 +30,5 @@ public class ProductDto {
   public int RetailPrice { get; set; }
   public int WholesalePrice { get; set; }
 
-  // TODO: Add leftover (decimal)
+  public decimal Leftover { get; set; }
 }

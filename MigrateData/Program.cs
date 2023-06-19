@@ -144,24 +144,25 @@ app.MapGet("/", async (OldAppDbContext oldDb, ApplicationDbContext newDb) => {
 
   foreach (var address in newAddresses)
   {
+    var firstName = $"Клиент {clientsCounter}";
     if (address.City == newCities.First(a => a.Name == "Фурманов") &&
         address is { Street: "улица Советская", Building: "13а" })
     {
-      clients.Add(new Client {
-        FirstName = "Рынок",
-        LastName = null,
-        Addresses = new List<Address> { address },
-      });
+      firstName = "Рынок";
     }
-    else
+
+    if (address.City == newCities.First(a => a.Name == "Фурманов") &&
+        address is { Street: "улица Мичурина", Building: "9" })
     {
-      clients.Add(new Client {
-        FirstName = $"Клиент {clientsCounter}",
-        LastName = null,
-        Addresses = new List<Address> { address },
-      });
-      clientsCounter++;
+      firstName = "Самовывоз";
     }
+
+    clients.Add(new Client {
+      FirstName = firstName,
+      LastName = null,
+      Addresses = new List<Address> { address },
+    });
+    clientsCounter++;
   }
 
   await newDb.Clients.AddRangeAsync(clients);

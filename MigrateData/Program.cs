@@ -4,6 +4,9 @@ using Backend.Data;
 using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
+using Backend.Modules.Clients.Contract;
+using Backend.Modules.MovementItems.Contract;
+using Backend.Modules.Orders.Contract;
 using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.PriceTypes.Contract;
 using Backend.Modules.Products.Contract;
@@ -95,14 +98,14 @@ app.MapGet("/", async (OldAppDbContext oldDb, ApplicationDbContext newDb) => {
     };
     newProducts.Add(newProduct);
     priceHistory.Add(new PriceChange {
-      ChangeTimestamp = DateTime.Now,
+      ChangeTimestamp = DateTime.UtcNow,
       Price = product.WholesalePrice,
       Product = newProduct,
       PriceType = await newDb.PriceTypes.FindAsync(PriceTypeEnum.Wholesale) ??
         throw new EntityWasNotFoundException(nameof(PriceType), PriceTypeEnum.Wholesale),
     });
     priceHistory.Add(new PriceChange {
-      ChangeTimestamp = DateTime.Now,
+      ChangeTimestamp = DateTime.UtcNow,
       Price = product.RetailPrice,
       Product = newProduct,
       PriceType = await newDb.PriceTypes.FindAsync(PriceTypeEnum.Retail) ??
@@ -113,11 +116,94 @@ app.MapGet("/", async (OldAppDbContext oldDb, ApplicationDbContext newDb) => {
   await newDb.Products.AddRangeAsync(newProducts);
   await newDb.PriceChanges.AddRangeAsync(priceHistory);
 
+  var oldOrders = await oldDb.Orders
+    .Include(o => o.OrderItems)
+    .Include(o => o.Address)
+    .ThenInclude(a => a.City)
+    .ToListAsync();
+
+  var oldOrderStatuses = await oldDb.OrderStatuses.ToListAsync();
+  var newStatuses = await newDb.MovementStatuses.ToListAsync();
+
+  // Fill mapper with id of old city and id of new city
+  var statusesMap = new Dictionary<Guid, Guid>();
+  foreach (var status in oldOrderStatuses)
+  {
+    var newStatus = newStatuses.FirstOrDefault(c => c.Name == status.Name);
+    if (newStatus is not null)
+    {
+      statusesMap.Add(status.Id, newStatus.Id);
+    }
+  }
+
+  var newOrders = new List<Order>();
+
+  var clients = new List<Client>();
+
+  var clientsCounter = 0;
+
+  foreach (var address in newAddresses)
+  {
+    if (address.City == newCities.First(a => a.Name == "Фурманов") &&
+        address is { Street: "улица Советская", Building: "13а" })
+    {
+      clients.Add(new Client {
+        FirstName = "Рынок",
+        LastName = null,
+        Addresses = new List<Address> { address },
+      });
+    }
+    else
+    {
+      clients.Add(new Client {
+        FirstName = $"Клиент {clientsCounter}",
+        LastName = null,
+        Addresses = new List<Address> { address },
+      });
+      clientsCounter++;
+    }
+  }
+
+  await newDb.Clients.AddRangeAsync(clients);
+
+  foreach (var oldOrder in oldOrders)
+  {
+    var items = new List<MovementItem>();
+
+    foreach (var item in oldOrder.OrderItems)
+    {
+      items.Add(new MovementItem() {
+        Product = newProducts.FirstOrDefault(p => p.Name == item.Product.Name),
+        Amount = (decimal)item.Amount,
+      });
+    }
+
+
+    newOrders.Add(new Order {
+      Date = oldOrder.Date,
+      IsDeleted = oldOrder.Deleted,
+      Client = clients.FirstOrDefault(c =>
+        c.Addresses.FirstOrDefault(a => a.City.Name == oldOrder.Address.City.Name &&
+          a.Building == oldOrder.Address.Building &&
+          a.Street == oldOrder.Address.Street) is not null),
+      SelectedAddress = newAddresses.FirstOrDefault(a =>
+        a.City.Name == oldOrder.Address.City.Name && a.Building == oldOrder.Address.Building &&
+        a.Street == oldOrder.Address.Street),
+      Status = await newDb.MovementStatuses.FindAsync(statusesMap[oldOrder.Status.Id]),
+      Items = items,
+    });
+  }
+
+  await newDb.Orders.AddRangeAsync(newOrders);
+  await newDb.SaveChangesAsync();
+
 
   return TypedResults.Ok(new Result {
     Addresses = newAddresses,
     PriceChanges = priceHistory,
     Products = newProducts,
+    Orders = newOrders,
+    Clients = clients,
   });
 });
 

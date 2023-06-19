@@ -21,6 +21,8 @@
 #region
 
 using Backend.Modules.Addresses.Contract;
+using Backend.Modules.Clients.Contract;
+using Backend.Modules.Orders.Contract;
 using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.Products.Contract;
 
@@ -33,4 +35,6 @@ public class Result {
   public List<Address> Addresses { get; set; }
   public List<Product> Products { get; set; }
   public List<PriceChange> PriceChanges { get; set; }
+  public List<Order> Orders { get; set; }
+  public List<Client> Clients { get; set; }
 }

@@ -10,7 +10,7 @@ using MigrateData.Data.Interfaces;
 namespace MigrateData.Data.Models;
 
 public class OldShipmentItem : OldBaseModel, ITransactionItem {
-  public OldProduct OldProduct { get; set; }
+  public OldProduct Product { get; set; }
   public double Amount { get; set; }
 
   [JsonIgnore]

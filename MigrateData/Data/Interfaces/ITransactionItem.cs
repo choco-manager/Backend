@@ -8,6 +8,6 @@ using MigrateData.Data.Models;
 namespace MigrateData.Data.Interfaces;
 
 public interface ITransactionItem {
-  public OldProduct OldProduct { get; set; }
+  public OldProduct Product { get; set; }
   public double Amount { get; set; }
 }

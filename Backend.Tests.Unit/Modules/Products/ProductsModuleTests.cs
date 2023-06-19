@@ -106,7 +106,7 @@ public class ProductsModuleTests {
     var productsList = await getResponse.Content.ReadFromJsonAsync<List<ProductDto>>();
 
 
-    var deleteResponse = await _client.PostAsync($"/api/trash/products/{productsList[0].Id}", null);
+    var deleteResponse = await _client.PostAsync($"/api/products/{productsList[0].Id}/restore", null);
     deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
     getResponse = await _client.GetAsync($"/api/products/{productsList[0].Id}");

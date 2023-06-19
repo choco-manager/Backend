@@ -52,11 +52,15 @@ public class ClientsModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/clients", GetClients).WithTags("Clients API");
-    endpoints.MapGet("/api/clients/{id:guid}", GetClientDetails).WithTags("Clients API");
-    endpoints.MapPut("/api/clients/{id:guid}", UpdateClient).WithTags("Clients API");
-    endpoints.MapPut("/api/clients/fake", GenerateFakeClients).WithTags("Clients API");
-    endpoints.MapPost("/api/clients", CreateClient).WithTags("Clients API");
+    var module = endpoints
+      .MapGroup("/api/clients")
+      .WithDescription("Clients API");
+
+    module.MapGet("", GetClients);
+    module.MapGet("{id:guid}", GetClientDetails);
+    module.MapPut("{id:guid}", UpdateClient);
+    module.MapPut("fake", GenerateFakeClients);
+    module.MapPost("", CreateClient);
 
     return endpoints;
   }

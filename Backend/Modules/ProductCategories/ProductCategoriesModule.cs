@@ -47,8 +47,10 @@ public class ProductCategoriesModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/productCategories", GetAllProductCategoriesHandler).WithTags("Product Categories API");
-    endpoints.MapPost("/api/productCategories", CreateProductCategoryHandler).WithTags("Product Categories API");
+    var module = endpoints.MapGroup("/api/productCategories").WithTags("Product categories API");
+
+    module.MapGet("", GetAllProductCategoriesHandler);
+    module.MapPost("", CreateProductCategoryHandler);
 
     return endpoints;
   }

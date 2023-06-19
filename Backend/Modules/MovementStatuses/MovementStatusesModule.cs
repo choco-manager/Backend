@@ -48,8 +48,12 @@ public class MovementStatusesModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/movementStatuses", GetMovementStatuses).WithTags("Movement Statuses API");
-    endpoints.MapPost("/api/movementStatuses", CreateMovementStatusHandler).WithTags("Movement Statuses API");
+    var module = endpoints
+      .MapGroup("/api/movementStatuses")
+      .WithTags("Movement Statuses API");
+
+    module.MapGet("", GetMovementStatuses);
+    module.MapPost("", CreateMovementStatusHandler);
 
     return endpoints;
   }

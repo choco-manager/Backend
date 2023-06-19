@@ -45,8 +45,12 @@ public class CitiesModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/cities", GetCitiesHandler).WithTags("Cities API");
-    endpoints.MapPost("/api/cities", CreateCityHandler).WithTags("Cities API");
+    var module = endpoints
+      .MapGroup("/api/cities")
+      .WithTags("Cities API");
+
+    module.MapGet("", GetCitiesHandler);
+    module.MapPost("", CreateCityHandler);
 
     return endpoints;
   }

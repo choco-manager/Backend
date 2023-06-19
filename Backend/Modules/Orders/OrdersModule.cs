@@ -52,13 +52,15 @@ public class OrdersModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/orders", GetOrders).WithTags("Orders API");
-    endpoints.MapGet("/api/orders/{id:guid}", GetOrdersDetails).WithTags("Orders API");
-    endpoints.MapPost("/api/orders", CreateOrder).WithTags("Orders API");
-    endpoints.MapPost("/api/orders/{id:guid}/delete", MarkOrderAsDeleted).WithTags("Orders API");
-    endpoints.MapPost("/api/trash/orders/{id:guid}", MarkOrderAsNotDeleted).WithTags("Orders API");
-    endpoints.MapPut("/api/orders/{id:guid}", UpdateOrder).WithTags("Orders API");
-    
+    var module = endpoints.MapGroup("/api/orders").WithTags("Orders API");
+
+    module.MapGet("", GetOrders);
+    module.MapGet("{id:guid}", GetOrdersDetails);
+    module.MapPost("", CreateOrder);
+    module.MapPost("{id:guid}/delete", MarkOrderAsDeleted);
+    module.MapPost("{id:guid}/restore", MarkOrderAsNotDeleted);
+    module.MapPut("{id:guid}", UpdateOrder);
+
     return endpoints;
   }
 

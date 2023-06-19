@@ -50,9 +50,13 @@ public class AddressesModule : IModule {
   }
 
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
-    endpoints.MapGet("/api/addresses", GetAddresses).WithTags("Addresses API");
-    endpoints.MapPost("/api/addresses", CreateAddress).WithTags("Addresses API");
-    endpoints.MapPut("/api/addresses/fake", GenerateAddresses).WithTags("Addresses API");
+    var module = endpoints
+      .MapGroup("/api/addresses")
+      .WithTags("Addresses API");
+
+    module.MapGet("", GetAddresses);
+    module.MapPost("", CreateAddress);
+    module.MapPut("fake", GenerateAddresses);
 
     return endpoints;
   }

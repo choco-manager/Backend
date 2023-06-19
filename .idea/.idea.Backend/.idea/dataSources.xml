@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/choco</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="choco@212.193.48.172" uuid="a9458774-ee75-4f7a-8574-f9cc56c39974">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://212.193.48.172:7232/choco</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

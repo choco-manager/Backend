@@ -70,7 +70,10 @@ public static class MovementItemsUtils {
     return difference;
   }
 
-  public static void ApplyDifferences(this IEnumerable<MovementItem> oldList, IEnumerable<MovementItem> diff) {
+  public static List<MovementItem> ApplyDifferences(
+    this IEnumerable<MovementItem> oldList,
+    IEnumerable<MovementItem> diff
+  ) {
     var comparer = new ProductEqualityComparer();
     var oldItems = oldList.ToList();
 
@@ -84,5 +87,9 @@ public static class MovementItemsUtils {
       }
       
     }
+
+    oldItems.RemoveAll(item => item.Amount <= 0);
+
+    return oldItems;
   }
 }

@@ -85,7 +85,7 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
 
       var problemDetails = new ProblemDetails {
         Status = (int)HttpStatusCode.Conflict,
-        Title = $"Could not change status {e.OldStatus} -> {e.NewStatus}",
+        Title = $"Could not change status {e.OldStatus.Name} -> {e.NewStatus.Name}",
         Detail = $"Could not change status of {e.MovementType} with Id = {e.Id}",
       };
       var json = JsonSerializer.Serialize(problemDetails);

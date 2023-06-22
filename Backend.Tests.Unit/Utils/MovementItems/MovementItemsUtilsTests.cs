@@ -318,4 +318,127 @@ public class MovementItemsUtilsTests {
     // Assert
     result.Should().BeEquivalentTo(expectation);
   }
+
+  [Test]
+  public void ApplyDifference__ShouldDoItCorrectly__WhenValidDifferencePassed() {
+    // Arrange
+    var oldList = new List<MovementItem> {
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 1",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 2,
+      },
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 2",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 1,
+      },
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 3",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 2,
+      },
+    };
+
+    var difference = new List<MovementItem> {
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 1",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = -1,
+      },
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 2",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 1,
+      },
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 3",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = -2,
+      },
+    };
+
+    var expectation = new List<MovementItem> {
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 1",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 1,
+      },
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 2",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 2,
+      },
+    };
+
+    // Act
+    var result = oldList.ApplyDifferences(difference);
+
+    // Assert
+    result.Should().BeEquivalentTo(expectation);
+  }
 }

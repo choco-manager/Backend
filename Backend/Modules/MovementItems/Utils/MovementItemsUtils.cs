@@ -21,6 +21,7 @@
 #region
 
 using Backend.Modules.MovementItems.Contract;
+using Backend.Modules.Products.Utils;
 
 #endregion
 
@@ -32,6 +33,40 @@ public static class MovementItemsUtils {
     this IEnumerable<MovementItem> oldList,
     IEnumerable<MovementItem> newList
   ) {
-    return new List<MovementItem>();
+    var difference = new List<MovementItem>();
+    var oldItems = oldList as MovementItem[] ?? oldList.ToArray();
+    var newItems = newList as MovementItem[] ?? newList.ToArray();
+    var comparer = new ProductEqualityComparer();
+
+
+    foreach (var newItem in newItems)
+    {
+      // Searching for changed amounts
+      var search = oldItems.FirstOrDefault(item => comparer.Equals(item.Product, newItem.Product));
+      if (search is not null && search.Amount != newItem.Amount)
+      {
+        difference.Add(
+          new MovementItem {
+            Product = search.Product,
+            Amount = newItem.Amount - search.Amount,
+          }
+        );
+        continue;
+      }
+
+      // Adding new items
+      if (oldItems.All(item => item != newItem))
+      {
+        difference.Add(newItem);
+      }
+    }
+
+    // Adding deleted items
+    difference.AddRange(oldItems
+      .Where(oldItem => newItems.All(item => !comparer.Equals(item.Product, oldItem.Product)))
+      .Select(oldItem => new MovementItem { Product = oldItem.Product, Amount = -oldItem.Amount })
+    );
+
+    return difference;
   }
 }

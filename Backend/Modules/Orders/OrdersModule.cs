@@ -28,6 +28,7 @@ using Backend.Modules.Clients.Contract;
 using Backend.Modules.MovementItems.Contract;
 using Backend.Modules.MovementItems.Utils;
 using Backend.Modules.MovementStatuses.Contract;
+using Backend.Modules.MovementStatuses.Utils;
 using Backend.Modules.Orders.Contract;
 using Backend.Modules.Products.Contract;
 
@@ -204,12 +205,19 @@ public class OrdersModule : IModule {
     [FromRoute] Guid id,
     [FromBody] UpdateOrderRequestBody body
   ) {
+    // TODO: Валидация
+    // TODO: Проверка на остатки товара
+
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
 
     order.Date = body.Date;
-    order.Status = await db.MovementStatuses.FindAsync(body.MovementStatusId) ??
+    var newStatus = await db.MovementStatuses.FindAsync(body.MovementStatusId) ??
       throw new EntityWasNotFoundException(nameof(MovementStatus), body.MovementStatusId);
+
+    order.Status = order.Status.IsChangePossible(newStatus)
+      ? newStatus
+      : throw new CouldNotChangeStatusException(order.Status, newStatus, nameof(Order), id);
 
     order.Client = await db.Clients.FindAsync(body.ClientId) ??
       throw new EntityWasNotFoundException(nameof(Client), body.ClientId);

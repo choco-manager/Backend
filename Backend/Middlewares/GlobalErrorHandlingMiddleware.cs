@@ -73,6 +73,27 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
       context.Response.ContentType = MediaTypeNames.Application.Json;
       await context.Response.WriteAsync(json);
     }
+    catch (CouldNotChangeStatusException e)
+    {
+      Log.Information(
+        "Could not change status from {OldStatus} to {NewStatus} in {MovementType} with Id = {Id}",
+        e.OldStatus.Name,
+        e.NewStatus.Name,
+        e.MovementType,
+        e.Id
+      );
+
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.Conflict,
+        Title = $"Could not change status {e.OldStatus} -> {e.NewStatus}",
+        Detail = $"Could not change status of {e.MovementType} with Id = {e.Id}",
+      };
+      var json = JsonSerializer.Serialize(problemDetails);
+
+      context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+      await context.Response.WriteAsync(json);
+    }
     catch (Exception e)
     {
       Log.Error(

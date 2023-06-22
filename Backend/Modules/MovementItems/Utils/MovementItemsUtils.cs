@@ -69,4 +69,20 @@ public static class MovementItemsUtils {
 
     return difference;
   }
+
+  public static void ApplyDifferences(this IEnumerable<MovementItem> oldList, IEnumerable<MovementItem> diff) {
+    var comparer = new ProductEqualityComparer();
+    var oldItems = oldList.ToList();
+
+    foreach (var diffItem in diff)
+    {
+      var search = oldItems.FirstOrDefault(item => comparer.Equals(diffItem.Product, item.Product));
+
+      if (search is not null)
+      {
+        search.Amount += diffItem.Amount;
+      }
+      
+    }
+  }
 }

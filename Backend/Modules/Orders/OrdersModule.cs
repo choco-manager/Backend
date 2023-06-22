@@ -230,6 +230,8 @@ public class OrdersModule : IModule {
 
     // TODO: Add calculating diff
     var diff = order.Items.GetDifferencesFrom(items);
+    
+    order.Items.ApplyDifferences(diff);
 
     await db.SaveChangesAsync();
 

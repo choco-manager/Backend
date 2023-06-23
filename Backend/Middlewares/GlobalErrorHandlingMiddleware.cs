@@ -94,6 +94,26 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
       context.Response.ContentType = MediaTypeNames.Application.Json;
       await context.Response.WriteAsync(json);
     }
+    catch (InsufficientProductLeftoverException e)
+    {
+      Log.Information(
+        "Insufficient amount of product {ProductName}: Requested {RequestedQuantity}, left {Leftover}",
+        e.Product.Name,
+        e.RequestedQuantity,
+        e.Leftover
+      );
+
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.Conflict,
+        Title = $"Insufficient amount of product {e.Product.Name}",
+        Detail = $"Requested {e.RequestedQuantity}, left {e.Leftover}",
+      };
+      var json = JsonSerializer.Serialize(problemDetails);
+
+      context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+      await context.Response.WriteAsync(json);
+    }
     catch (Exception e)
     {
       Log.Error(

@@ -92,6 +92,12 @@ public class OrdersModule : IModule {
         .OrderByDescending(o => o.Date)
         .Skip(offset)
         .Take(count)
+        .Include(o => o.Client)
+        .Include(o => o.Status)
+        .Include(o => o.Items)
+        .ThenInclude(i => i.Product)
+        .Include(o => o.SelectedAddress)
+        .ThenInclude(a => a.City)
         .Select(o => mappers.Cut(o))
         .ToListAsync();
     }
@@ -101,6 +107,12 @@ public class OrdersModule : IModule {
         .OrderByDescending(o => o.Date)
         .Skip(offset)
         .Take(count)
+        .Include(o => o.Client)
+        .Include(o => o.Status)
+        .Include(o => o.Items)
+        .ThenInclude(i => i.Product)
+        .Include(o => o.SelectedAddress)
+        .ThenInclude(a => a.City)
         .Select(o => mappers.Cut(o))
         .ToListAsync();
     }

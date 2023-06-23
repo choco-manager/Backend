@@ -218,7 +218,6 @@ public class OrdersModule : IModule {
     [FromBody] UpdateOrderRequestBody body
   ) {
     // TODO: Валидация
-    // TODO: Проверка на остатки товара
 
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
@@ -249,6 +248,21 @@ public class OrdersModule : IModule {
     }
 
     var diff = order.Items.GetDifferencesFrom(items);
+
+    foreach (var item in diff)
+    {
+      var product = item.Product;
+      var leftover = await db.MovementItems
+        .Include(mi => mi.Product)
+        .Where(mi => mi.Product.Id == product.Id)
+        .SumAsync(mi => mi.Amount);
+
+      if (leftover - item.Amount < 0)
+      {
+        throw new InsufficientProductLeftoverException(product, leftover, leftover - item.Amount);
+      }
+    }
+    
     order.Items = order.Items.ApplyDifferences(diff);
 
     await db.SaveChangesAsync();

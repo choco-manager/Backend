@@ -259,7 +259,7 @@ public class OrdersModule : IModule {
 
       if (leftover - item.Amount < 0)
       {
-        throw new InsufficientProductLeftoverException(product, leftover, leftover - item.Amount);
+        throw new InsufficientProductLeftoverException(product, leftover, item.Amount);
       }
     }
     

@@ -19,11 +19,11 @@
 
 #region
 
-using System.Net;
-
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
+using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
+using Backend.Modules.Cities.Contract;
 
 using FluentValidation;
 
@@ -90,14 +90,8 @@ public class AddressesModule : IModule {
   ) {
     await validator.ValidateAndThrowAsync(body);
 
-    var city = await db.Cities.FirstOrDefaultAsync(city => city.Id == body.City);
-    if (city is null)
-    {
-      return TypedResults.BadRequest(new ProblemDetails {
-        Status = (int)HttpStatusCode.BadRequest,
-        Title = $"City '{body.City}' was not found",
-      });
-    }
+    var city = await db.Cities.FirstOrDefaultAsync(city => city.Id == body.City) ??
+      throw new EntityWasNotFoundException(nameof(City), body.City);
 
     var address = await db.Addresses.FirstOrDefaultAsync(address =>
       address.City == city && address.Street == body.Street && address.Building == body.Building);

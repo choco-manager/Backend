@@ -23,9 +23,12 @@
 using Backend.Data;
 using Backend.Data.Extensions;
 using Backend.Exceptions;
+using Backend.Modules.MovementItems.Contract;
+using Backend.Modules.MovementStatuses.Contract;
 using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.PriceTypes.Contract;
 using Backend.Modules.Products.Contract;
+using Backend.Modules.Shipments.Contract;
 
 using FluentValidation;
 
@@ -72,7 +75,7 @@ public class ProductsModule : IModule {
     {
       product.Leftover = await db.MovementItems.GetLeftoverFor(product.Id);
     }
-    
+
     op.Complete();
     Log.Information("Fetched {Count} products", products.Count);
     return TypedResults.Ok(products);
@@ -221,8 +224,6 @@ public class ProductsModule : IModule {
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateProductRequestBody> validator
   ) {
-    // TODO: Добавить остаток как опциональное поле в модельку
-    
     await validator.ValidateAndThrowAsync(body);
 
     var product = new Product {
@@ -248,6 +249,18 @@ public class ProductsModule : IModule {
         ChangeTimestamp = DateTime.UtcNow,
       });
     await db.Products.AddAsync(product);
+
+    await db.Shipments.AddAsync(new Shipment {
+      Status = await db.MovementStatuses.FirstOrDefaultAsync(status => status.Name == "Выполнен") ??
+        throw new EntityWasNotFoundException(nameof(MovementStatus), "Выполнен"),
+      Items = new List<MovementItem> {
+        new() {
+          Product = product,
+          Amount = body.Leftover,
+        },
+      },
+    });
+
 
     await db.SaveChangesAsync();
 

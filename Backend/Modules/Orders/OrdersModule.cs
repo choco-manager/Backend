@@ -22,6 +22,7 @@
 
 using Backend.Data;
 using Backend.Data.DateRange;
+using Backend.Data.Extensions;
 using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Clients.Contract;
@@ -252,10 +253,7 @@ public class OrdersModule : IModule {
     foreach (var item in diff)
     {
       var product = item.Product;
-      var leftover = await db.MovementItems
-        .Include(mi => mi.Product)
-        .Where(mi => mi.Product.Id == product.Id)
-        .SumAsync(mi => mi.Amount);
+      var leftover = await db.MovementItems.GetLeftoverFor(product.Id);
 
       if (leftover - item.Amount < 0)
       {

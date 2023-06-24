@@ -21,6 +21,7 @@
 #region
 
 using Backend.Data;
+using Backend.Data.Extensions;
 using Backend.Exceptions;
 using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.PriceTypes.Contract;
@@ -69,10 +70,7 @@ public class ProductsModule : IModule {
 
     foreach (var product in products)
     {
-      product.Leftover = await db.MovementItems
-        .Include(mi => mi.Product)
-        .Where(mi => mi.Product.Id == product.Id)
-        .SumAsync(mi => mi.Amount);
+      product.Leftover = await db.MovementItems.GetLeftoverFor(product.Id);
     }
     
     op.Complete();
@@ -116,10 +114,7 @@ public class ProductsModule : IModule {
 
     using var leftoverOp = Operation.Begin("Calculating leftover");
 
-    var leftover = await db.MovementItems
-      .Include(mi => mi.Product)
-      .Where(mi => mi.Product.Id == product.Id)
-      .SumAsync(mi => mi.Amount);
+    var leftover = await db.MovementItems.GetLeftoverFor(product.Id);
 
     leftoverOp.Complete();
 
@@ -213,10 +208,7 @@ public class ProductsModule : IModule {
 
     await db.SaveChangesAsync();
 
-    var leftover = await db.MovementItems
-      .Include(mi => mi.Product)
-      .Where(mi => mi.Product.Id == product.Id)
-      .SumAsync(mi => mi.Amount);
+    var leftover = await db.MovementItems.GetLeftoverFor(product.Id);
 
     return TypedResults.Ok(mappers.Cut(product, leftover));
   }
@@ -229,6 +221,8 @@ public class ProductsModule : IModule {
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateProductRequestBody> validator
   ) {
+    // TODO: Добавить остаток как опциональное поле в модельку
+    
     await validator.ValidateAndThrowAsync(body);
 
     var product = new Product {

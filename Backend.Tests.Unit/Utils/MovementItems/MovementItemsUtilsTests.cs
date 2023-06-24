@@ -441,4 +441,56 @@ public class MovementItemsUtilsTests {
     // Assert
     result.Should().BeEquivalentTo(expectation);
   }
+
+  [Test]
+  public void Optimized__ShouldMergeDuplicatedItems__WhenPassedListWithDuplicatedProducts() {
+    var list = new List<MovementItem> {
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 1",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 2,
+      },
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 1",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 3,
+      },
+    };
+
+    var expectation = new List<MovementItem> {
+      new() {
+        Product = new Product {
+          Category = null,
+          IsByWeight = false,
+          IsDeleted = false,
+          Name = "Товар 1",
+          Id = Guid.Empty,
+          RetailPrice = 300,
+          WholesalePrice = 400,
+          VkMarketId = 0,
+        },
+        Amount = 5,
+      },
+    };
+
+    var result = list.Optimized();
+
+    result.Should().BeEquivalentTo(expectation);
+  }
 }

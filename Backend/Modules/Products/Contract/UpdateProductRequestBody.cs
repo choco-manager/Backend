@@ -27,4 +27,5 @@ public class UpdateProductRequestBody {
   public int RetailPrice { get; set; }
   public bool IsByWeight { get; set; }
   public int VkMarketId { get; set; }
+  public decimal Leftover { get; set; }
 }

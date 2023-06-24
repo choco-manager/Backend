@@ -61,12 +61,26 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
     }
     catch (EntityWasNotFoundException e)
     {
-      Log.Information("{Entity} with Id = {Id} was not found", e.Name, e.Id);
+      var title = $"{e.Name} was not found";
+      string detail;
+
+      if (e.Id is not null)
+      {
+        Log.Information("{Entity} with Id = {Id} was not found", e.Name, e.Id);
+        detail = $"{e.Name} with Id = {e.Id} is not presented in the database";
+      }
+      else
+      {
+        Log.Information("{Entity} by query {Query} was not found", e.Name, e.Query);
+        detail = $"{e.Name} with Id = {e.Id} is not presented in the database";
+      }
+
       var problemDetails = new ProblemDetails {
         Status = (int)HttpStatusCode.NotFound,
-        Title = $"{e.Name} was not found",
-        Detail = $"{e.Name} with Id = {e.Id} is not presented in the database",
+        Title = title,
+        Detail = detail,
       };
+
       var json = JsonSerializer.Serialize(problemDetails);
 
       context.Response.StatusCode = (int)HttpStatusCode.NotFound;

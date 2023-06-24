@@ -21,11 +21,19 @@
 namespace Backend.Exceptions;
 
 public class EntityWasNotFoundException : Exception {
-  public Guid Id { get; init; }
-  public string Name { get; init; }
+  public Guid? Id { get; init; }
+  public string Query { get; init; }
+  public string? Name { get; init; }
 
   public EntityWasNotFoundException(string entityName, Guid entityId) {
     Id = entityId;
     Name = entityName;
+    Query = "";
+  }
+
+  public EntityWasNotFoundException(string entityName, string query) {
+    Id = null;
+    Name = entityName;
+    Query = query;
   }
 }

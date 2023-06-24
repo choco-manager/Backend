@@ -21,7 +21,6 @@
 #region
 
 using Backend.Modules.Clients.Contract;
-using Backend.Modules.MovementItems.Contract;
 
 #endregion
 
@@ -30,8 +29,8 @@ namespace Backend.Modules.Orders.Contract;
 
 public class OrderDto {
   public DateOnly Date { get; set; }
-  public string MovementStatusName { get; set; }
-  public List<MovementItem> Items { get; set; }
+  public string StatusName { get; set; }
+  public List<string> Items { get; set; }
   public ClientDto Client { get; set; }
   public string SelectedAddress { get; set; }
   public bool IsDeleted { get; set; }

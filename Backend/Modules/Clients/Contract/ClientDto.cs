@@ -18,11 +18,22 @@
 // 
 
 
+#region
+
+using System.Text.Json.Serialization;
+
+#endregion
+
+
 namespace Backend.Modules.Clients.Contract;
 
 public class ClientDto {
   public Guid Id { get; set; }
   public required string FirstName { get; set; }
+
+  [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
   public string? LastName { get; set; }
+
+  [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
   public string? PhoneNumber { get; set; }
 }

@@ -22,6 +22,7 @@
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
 using Backend.Modules.Clients.Contract;
+using Backend.Modules.MovementItems.Contract;
 using Backend.Modules.MovementStatuses.Contract;
 using Backend.Modules.Orders.Contract;
 using Backend.Modules.PriceChanges.Contract;
@@ -71,6 +72,7 @@ public partial class Mappers {
 
   public partial ClientDto Cut(Client client);
 
+  [MapProperty(new[] { nameof(Order.Status), nameof(Order.Status.Name) }, new[] { nameof(OrderDto.StatusName) })]
   public partial OrderDto Cut(Order order);
 
   public partial UpdateClientRequestBody CutToRb(Client client);
@@ -81,5 +83,10 @@ public partial class Mappers {
 
   private string AddressToReadableAddress(Address address) {
     return $"г. {address.City.Name}, {address.Street}, {address.Building}";
+  }
+
+  private string MovementItemToString(MovementItem movementItem) {
+    var unit = movementItem.Product.IsByWeight ? "шт" : "кг";
+    return $"{movementItem.Product.Name} x{movementItem.Amount} {unit}.";
   }
 }

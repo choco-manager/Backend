@@ -34,7 +34,7 @@ public static class MovementItemsUtils {
     IEnumerable<MovementItem> newList
   ) {
     var difference = new List<MovementItem>();
-    var oldItems = oldList as MovementItem[] ?? oldList.ToArray();
+    var oldItems = oldList as MovementItem[] ?? oldList.Optimized().ToArray();
     var newItems = newList as MovementItem[] ?? newList.ToArray();
     var comparer = new ProductEqualityComparer();
 
@@ -91,5 +91,27 @@ public static class MovementItemsUtils {
     oldItems.RemoveAll(item => item.Amount <= 0);
 
     return oldItems;
+  }
+
+  public static List<MovementItem> Optimized(this IEnumerable<MovementItem> list) {
+    var result = new List<MovementItem>();
+    var movementItems = list as MovementItem[] ?? list.ToArray();
+    var comparer = new ProductEqualityComparer();
+
+    foreach (var item in movementItems)
+    {
+      var movementItem = result.FirstOrDefault(i => comparer.Equals(i.Product, item.Product));
+
+      if (movementItem is null)
+      {
+        result.Add(item);
+      }
+      else
+      {
+        movementItem.Amount += item.Amount;
+      }
+    }
+
+    return result;
   }
 }

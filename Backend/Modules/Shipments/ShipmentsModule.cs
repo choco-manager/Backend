@@ -131,6 +131,10 @@ public class ShipmentsModule : IModule {
     return TypedResults.Ok(shipment);
   }
 
+  [SwaggerOperation(Summary = "Creates new order")]
+  [SwaggerResponse(201, "Shipment was created successfully", typeof(Shipment))]
+  [SwaggerResponse(404, "Some entity was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> CreateShipment(
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateShipmentRequestBody> validator,

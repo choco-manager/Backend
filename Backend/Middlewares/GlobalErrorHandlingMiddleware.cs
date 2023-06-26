@@ -160,6 +160,23 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
       context.Response.ContentType = MediaTypeNames.Application.Json;
       await context.Response.WriteAsync(json);
     }
+    catch (EntityIsAlreadyRestoredException e)
+    {
+      Log.Information("Entity {EntityName} with Id = {Id} is already restored", e.Name, e.Id);
+
+
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.Conflict,
+        Title = "Сущность уже была восстановлена",
+        Detail = $"Сущность {e.Name} с идентификатором {e.Id} уже была помечена восстановленной",
+      };
+
+      var json = JsonSerializer.Serialize(problemDetails);
+
+      context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+      await context.Response.WriteAsync(json);
+    }
     catch (Exception e)
     {
       Log.Error(

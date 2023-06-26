@@ -158,7 +158,7 @@ public class OrdersModule : IModule {
     foreach (var item in body.Items)
     {
       items.Add(new MovementItem {
-        Amount = item.Amount,
+        Amount = -item.Amount,
         Product = await db.Products.FindAsync(item.ProductId) ??
           throw new EntityWasNotFoundException(nameof(Product), item.ProductId),
       });

@@ -28,6 +28,7 @@ using Backend.Modules.Orders.Contract;
 using Backend.Modules.PriceChanges.Contract;
 using Backend.Modules.ProductCategories.Contract;
 using Backend.Modules.Products.Contract;
+using Backend.Modules.Shipments.Contract;
 
 using Riok.Mapperly.Abstractions;
 
@@ -75,6 +76,8 @@ public partial class Mappers {
 
   [MapProperty(new[] { nameof(Order.Status), nameof(Order.Status.Name) }, new[] { nameof(OrderDto.StatusName) })]
   public partial OrderDto Cut(Order order);
+
+  public partial ShipmentDto Cut(Shipment shipment);
 
   public partial UpdateClientRequestBody CutToRb(Client client);
 

@@ -48,10 +48,10 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
 
       var problemDetails = new ProblemDetails {
         Status = (int)HttpStatusCode.BadRequest,
-        Title = "Failed validation",
+        Title = "Ошибка валидации",
         Detail = string.Join(", ",
           e.Errors.Select(failure =>
-            $"Error in {failure.PropertyName}: {failure.ErrorMessage} (passed value '{failure.AttemptedValue}')")),
+            $"Ошибка в свойстве {failure.PropertyName}: {failure.ErrorMessage} (передано значение '{failure.AttemptedValue}')")),
       };
 
       var json = JsonSerializer.Serialize(problemDetails);
@@ -61,18 +61,18 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
     }
     catch (EntityWasNotFoundException e)
     {
-      var title = $"{e.Name} was not found";
+      var title = $"{e.Name} не найдена";
       string detail;
 
       if (e.Id is not null)
       {
-        Log.Information("{Entity} with Id = {Id} was not found", e.Name, e.Id);
-        detail = $"{e.Name} with Id = {e.Id} is not presented in the database";
+        Log.Information("{Entity} не найдена", e.Name);
+        detail = $"{e.Name} с идентификатором {e.Id} не существует в базе данных";
       }
       else
       {
-        Log.Information("{Entity} by query {Query} was not found", e.Name, e.Query);
-        detail = $"{e.Name} with Id = {e.Id} is not presented in the database";
+        Log.Information("{Entity} не найдена", e.Name);
+        detail = $"{e.Name} по запросу {e.Query} не существует в базе данных";
       }
 
       var problemDetails = new ProblemDetails {
@@ -99,8 +99,8 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
 
       var problemDetails = new ProblemDetails {
         Status = (int)HttpStatusCode.Conflict,
-        Title = $"Could not change status {e.OldStatus.Name} -> {e.NewStatus.Name}",
-        Detail = $"Could not change status of {e.MovementType} with Id = {e.Id}",
+        Title = $"Нельзя сменить статус {e.OldStatus.Name} -> {e.NewStatus.Name}",
+        Detail = $"Не получилось изменить статус {e.MovementType} с идентификатором {e.Id}",
       };
       var json = JsonSerializer.Serialize(problemDetails);
 
@@ -119,8 +119,8 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
 
       var problemDetails = new ProblemDetails {
         Status = (int)HttpStatusCode.Conflict,
-        Title = $"Insufficient amount of product {e.Product.Name}",
-        Detail = $"Requested {e.RequestedQuantity}, left {e.Leftover}",
+        Title = $"Недостаточно товара {e.Product.Name}",
+        Detail = $"Запрошено {e.RequestedQuantity}, осталось {e.Leftover}",
       };
       var json = JsonSerializer.Serialize(problemDetails);
 
@@ -134,8 +134,8 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
 
       var problemDetails = new ProblemDetails {
         Status = (int)HttpStatusCode.BadRequest,
-        Title = $"Could not parse provided date range string {e.InvalidString}",
-        Detail = $"Required format is YYYY-MM-DD:YYYY-MM-DD",
+        Title = $"Ошибка разбора диапазона дат {e.InvalidString}",
+        Detail = $"Требуемый формат ГГГГ-ММ-ДД:ГГГГ-ММ-ММ",
       };
       var json = JsonSerializer.Serialize(problemDetails);
 

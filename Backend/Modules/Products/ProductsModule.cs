@@ -69,7 +69,10 @@ public class ProductsModule : IModule {
   [SwaggerResponse(200, "Products was returned successfully", typeof(List<Product>))]
   private async Task<IResult> GetAllProducts([FromServices] ApplicationDbContext db, [FromServices] Mappers mappers) {
     using var op = Operation.Begin("Requesting products");
-    var products = await db.Products.Select(product => mappers.Cut(product, 0)).ToListAsync();
+    var products = await db.Products
+      .Include(p => p.Category)
+      .Select(product => mappers.Cut(product, 0))
+      .ToListAsync();
 
     foreach (var product in products)
     {

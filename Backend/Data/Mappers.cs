@@ -67,7 +67,8 @@ public partial class Mappers {
     return dto;
   }
 
-  [MapProperty(nameof(Product.Category.Id), nameof(ProductDto.ProductCategoryId))]
+  [MapProperty(new[] { nameof(Product.Category), nameof(Product.Category.Name) },
+    new[] { nameof(ProductDto.CategoryName) })]
   private partial ProductDto Cut(Product product);
 
   public partial ClientDto Cut(Client client);

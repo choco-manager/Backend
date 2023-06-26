@@ -143,6 +143,23 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
       context.Response.ContentType = MediaTypeNames.Application.Json;
       await context.Response.WriteAsync(json);
     }
+    catch (EntityIsAlreadyDeletedException e)
+    {
+      Log.Information("Entity {EntityName} with Id = {Id} is already deleted", e.Name, e.Id);
+
+
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.Conflict,
+        Title = "Сущность уже была удалена",
+        Detail = $"Сущность {e.Name} с идентификатором {e.Id} уже была помечена удалённой",
+      };
+
+      var json = JsonSerializer.Serialize(problemDetails);
+
+      context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+      await context.Response.WriteAsync(json);
+    }
     catch (Exception e)
     {
       Log.Error(

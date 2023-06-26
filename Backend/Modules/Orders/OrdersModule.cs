@@ -236,11 +236,12 @@ public class OrdersModule : IModule {
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> UpdateOrder(
     [FromServices] ApplicationDbContext db,
+    [FromServices] AbstractValidator<UpdateOrderRequestBody> validator,
     [FromRoute] Guid id,
     [FromBody] UpdateOrderRequestBody body
   ) {
-    // TODO: Валидация
-
+    await validator.ValidateAndThrowAsync(body);
+    
     var op = Operation.Begin("Updating order");
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);

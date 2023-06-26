@@ -60,6 +60,7 @@ public class MovementStatusesModule : IModule {
 
   [SwaggerOperation(Summary = "Gets all available movement statuses")]
   [SwaggerResponse(200, "Movement statuses was returned successfully", typeof(List<MovementStatus>))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private static async Task<IResult> GetMovementStatuses([FromServices] ApplicationDbContext db) {
     using var op = Operation.Begin("Requesting movement statuses");
     var movementStatuses = await db.MovementStatuses.ToListAsync();
@@ -71,6 +72,7 @@ public class MovementStatusesModule : IModule {
   [SwaggerOperation(Summary = "Creates new movement status")]
   [SwaggerResponse(201, "Movement status was created successfully", typeof(MovementStatus))]
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private static async Task<IResult> CreateMovementStatusHandler(
     [FromBody] [SwaggerRequestBody(Description = "Name of the movement status to create", Required = true)]
     CreateMovementStatusRequestBody movementStatus,

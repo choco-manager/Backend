@@ -67,6 +67,7 @@ public class ProductsModule : IModule {
 
   [SwaggerOperation(Summary = "Gets all available products")]
   [SwaggerResponse(200, "Products was returned successfully", typeof(List<Product>))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetAllProducts([FromServices] ApplicationDbContext db, [FromServices] Mappers mappers) {
     using var op = Operation.Begin("Requesting products");
     var products = await db.Products
@@ -87,6 +88,7 @@ public class ProductsModule : IModule {
   [SwaggerOperation(Summary = "Gets details of product")]
   [SwaggerResponse(200, "Product details was returned successfully", typeof(Product))]
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetProductDetails(
     [FromRoute] Guid id,
     [FromServices] ApplicationDbContext db,
@@ -96,13 +98,9 @@ public class ProductsModule : IModule {
     var product = await db.Products
       .Where(p => p.Id == id)
       .Include(p => p.Category)
-      .FirstOrDefaultAsync();
+      .FirstOrDefaultAsync() ?? throw new EntityWasNotFoundException(nameof(Product), id);
+    
     productOp.Complete();
-
-    if (product is null)
-    {
-      throw new EntityWasNotFoundException(nameof(Product), id);
-    }
 
     using var pricesOp = Operation.Begin("Collecting prices change history of product with Id = {Id}", id);
     var retailPrices = await db.PriceChanges
@@ -131,6 +129,7 @@ public class ProductsModule : IModule {
   [SwaggerOperation(Summary = "Marks product as deleted")]
   [SwaggerResponse(204, "Product was successfully marked as deleted")]
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> DeleteProduct(
     [FromRoute] Guid id,
     [FromServices] ApplicationDbContext db
@@ -138,6 +137,11 @@ public class ProductsModule : IModule {
     using var op = Operation.Begin("Deleting product with Id = {Id}", id);
     var product = await db.Products.FirstOrDefaultAsync(p => p.Id == id) ??
       throw new EntityWasNotFoundException(nameof(Product), id);
+
+    if (product.IsDeleted)
+    {
+      throw new EntityIsAlreadyDeletedException(nameof(Product), id);
+    }
 
     product.IsDeleted = true;
 
@@ -150,6 +154,7 @@ public class ProductsModule : IModule {
   [SwaggerOperation(Summary = "Marks product as not deleted")]
   [SwaggerResponse(204, "Product was successfully marked as not deleted")]
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> RestoreProduct(
     [FromRoute] Guid id,
     [FromServices] ApplicationDbContext db
@@ -158,6 +163,11 @@ public class ProductsModule : IModule {
     var product = await db.Products.FirstOrDefaultAsync(p => p.Id == id) ??
       throw new EntityWasNotFoundException(nameof(Product), id);
 
+    if (!product.IsDeleted)
+    {
+      throw new EntityIsAlreadyRestoredException(nameof(Product), id);
+    }
+    
     product.IsDeleted = false;
 
     await db.SaveChangesAsync();
@@ -170,6 +180,7 @@ public class ProductsModule : IModule {
   [SwaggerResponse(200, "Product was successfully updated", typeof(ProductDto))]
   [SwaggerResponse(400, "Invalid body", typeof(ProblemDetails))]
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> UpdateProduct(
     [FromRoute] Guid id,
     [FromBody] UpdateProductRequestBody body,
@@ -179,6 +190,8 @@ public class ProductsModule : IModule {
   ) {
     await validator.ValidateAndThrowAsync(body);
 
+    var op = Operation.Begin("Updating product");
+    
     var product = await db.Products
       .Include(p => p.Category)
       .Where(p => p.Id == id)
@@ -214,6 +227,8 @@ public class ProductsModule : IModule {
 
     await db.SaveChangesAsync();
 
+    op.Complete();
+
     var leftover = await db.MovementItems.GetLeftoverFor(product.Id);
 
     return TypedResults.Ok(mappers.Cut(product, leftover));
@@ -222,12 +237,15 @@ public class ProductsModule : IModule {
   [SwaggerOperation(Summary = "Creates product")]
   [SwaggerResponse(201, "Product was successfully created", typeof(ProductDto))]
   [SwaggerResponse(400, "Invalid body", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> CreateProduct(
     [FromBody] UpdateProductRequestBody body,
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateProductRequestBody> validator
   ) {
     await validator.ValidateAndThrowAsync(body);
+
+    var op = Operation.Begin("Creating product");
 
     var product = new Product {
       Name = body.Name,
@@ -266,6 +284,8 @@ public class ProductsModule : IModule {
 
 
     await db.SaveChangesAsync();
+
+    op.Complete();
 
     return TypedResults.Created("/api/products", product);
   }

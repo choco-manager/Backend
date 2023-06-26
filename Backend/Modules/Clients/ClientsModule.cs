@@ -68,6 +68,7 @@ public class ClientsModule : IModule {
 
   [SwaggerOperation(Summary = "Gets all available clients (with pagination)")]
   [SwaggerResponse(200, "Clients was returned successfully", typeof(List<ClientDto>))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetClients(
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
@@ -86,6 +87,7 @@ public class ClientsModule : IModule {
   [SwaggerOperation(Summary = "Gets detail of client")]
   [SwaggerResponse(200, "Client was returned successfully", typeof(Client))]
   [SwaggerResponse(404, "Client was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetClientDetails(
     [FromRoute] Guid id,
     [FromServices] ApplicationDbContext db
@@ -95,19 +97,17 @@ public class ClientsModule : IModule {
       .Where(c => c.Id == id)
       .Include(c => c.Addresses)
       .ThenInclude(a => a.City)
-      .FirstOrDefaultAsync();
+      .FirstOrDefaultAsync() ?? throw new EntityWasNotFoundException(nameof(Client), id);
     clientOp.Complete();
-
-    if (client is null)
-    {
-      throw new EntityWasNotFoundException(nameof(Client), id);
-    }
 
     Log.Information("Fetched client '{FirstName} {LastName}'", client.FirstName, client.LastName);
     return TypedResults.Ok(client);
   }
 
   [SwaggerOperation(Summary = "Creates client")]
+  [SwaggerResponse(201, "Client was created successfully", typeof(Client))]
+  [SwaggerResponse(404, "Address was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> CreateClient(
     [FromBody] UpdateClientRequestBody body,
     [FromServices] ApplicationDbContext db,
@@ -117,15 +117,17 @@ public class ClientsModule : IModule {
 
     var addresses = new List<Address>();
 
+    var addressesOp = Operation.Begin("Searching addresses");
     foreach (var addressId in body.Addresses)
     {
-      var address = await db.Addresses.FindAsync(addressId);
-
-      if (address is not null)
-      {
-        addresses.Add(address);
-      }
+      var address = await db.Addresses.FindAsync(addressId) ??
+        throw new EntityWasNotFoundException(nameof(Address), addressId);
+      addresses.Add(address);
     }
+
+    addressesOp.Complete();
+
+    var createClientOp = Operation.Begin("Creating client");
 
     var client = new Client {
       FirstName = body.FirstName,
@@ -138,12 +140,15 @@ public class ClientsModule : IModule {
     await db.Clients.AddAsync(client);
     await db.SaveChangesAsync();
 
+    createClientOp.Complete();
+
     return TypedResults.Created("/api/clients", client);
   }
 
   [SwaggerOperation(Summary = "Updates client")]
   [SwaggerResponse(200, "Client was updated successfully", typeof(Client))]
   [SwaggerResponse(404, "Client was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> UpdateClient(
     [FromRoute] Guid id,
     [FromBody] UpdateClientRequestBody body,
@@ -159,13 +164,8 @@ public class ClientsModule : IModule {
       .Where(c => c.Id == id)
       .Include(c => c.Addresses)
       .ThenInclude(a => a.City)
-      .FirstOrDefaultAsync();
+      .FirstOrDefaultAsync() ?? throw new EntityWasNotFoundException(nameof(Client), id);
     clientOp.Complete();
-
-    if (client is null)
-    {
-      throw new EntityWasNotFoundException(nameof(Client), id);
-    }
 
     var shortenClient = mappers.CutToRb(client);
 
@@ -175,12 +175,10 @@ public class ClientsModule : IModule {
 
     foreach (var newAddressId in newAddressesList)
     {
-      var address = await db.Addresses.FindAsync(newAddressId);
+      var address = await db.Addresses.FindAsync(newAddressId) ??
+        throw new EntityWasNotFoundException(nameof(Address), newAddressId);
 
-      if (address is not null)
-      {
-        addresses.Add(address);
-      }
+      addresses.Add(address);
     }
 
     client.FirstName = body.FirstName;
@@ -196,9 +194,12 @@ public class ClientsModule : IModule {
 
   [SwaggerOperation(Summary = "Generates fake clients")]
   [SwaggerResponse(201, "Clients was generated successfully", typeof(List<Client>))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GenerateFakeClients([FromServices] ApplicationDbContext db) {
     var generator = new GenerateClients();
+    var op = Operation.Begin("Generating clients");
     var clients = await generator.Generate(db);
+    op.Complete();
     return TypedResults.Created("/api/clients", clients);
   }
 }

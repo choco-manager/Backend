@@ -64,6 +64,7 @@ public class AddressesModule : IModule {
 
   [SwaggerOperation(Summary = "Gets all available addresses (with pagination)")]
   [SwaggerResponse(200, "Addresses was returned successfully", typeof(List<Address>))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetAddresses(
     [FromServices] ApplicationDbContext db,
     [FromQuery] int pageNumber = 0,
@@ -81,6 +82,7 @@ public class AddressesModule : IModule {
   [SwaggerResponse(200, "Found existing address with passed data, no address was created", typeof(Address))]
   [SwaggerResponse(201, "Address was created successfully", typeof(Address))]
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> CreateAddress(
     [FromBody] CreateAddressRequestBody body,
     [FromServices] ApplicationDbContext db,
@@ -88,17 +90,29 @@ public class AddressesModule : IModule {
   ) {
     await validator.ValidateAndThrowAsync(body);
 
+    var cityOp = Operation.Begin("Searching for city by Id");
+
     var city = await db.Cities.FirstOrDefaultAsync(city => city.Id == body.City) ??
       throw new EntityWasNotFoundException(nameof(City), body.City);
 
+    cityOp.Complete();
+
+    var addressOp = Operation.Begin("Searching for address by its parameters");
+
     var address = await db.Addresses.FirstOrDefaultAsync(address =>
-      address.City == city && address.Street == body.Street && address.Building == body.Building);
+      address.City.Name == city.Name && address.Street == body.Street && address.Building == body.Building);
+
+    addressOp.Complete();
 
     if (address is not null)
     {
+      Log.Information("Requested address was found, returning it, instead of creating new one");
       return TypedResults.Ok(address);
     }
 
+
+    var createAddressOp = Operation.Begin("Creating new address");
+    
     var createdAddress = new Address {
       City = city,
       Street = body.Street,
@@ -108,14 +122,19 @@ public class AddressesModule : IModule {
     await db.AddAsync(createdAddress);
     await db.SaveChangesAsync();
 
+    createAddressOp.Complete();
+
     return TypedResults.Created("/api/addresses", createdAddress);
   }
 
   [SwaggerOperation(Summary = "Generates new fake addresses")]
   [SwaggerResponse(201, "Addresses was created successfully", typeof(List<Address>))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GenerateAddresses([FromServices] ApplicationDbContext db) {
     var generator = new GenerateAddresses();
+    var op = Operation.Begin("Generating fake addreses");
     var addresses = await generator.Generate(db);
+    op.Complete();
     return TypedResults.Created("/api/addresses", addresses);
   }
 }

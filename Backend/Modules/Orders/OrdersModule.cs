@@ -70,6 +70,7 @@ public class OrdersModule : IModule {
   [SwaggerOperation(Summary = "Gets all available orders (with pagination and filtering by date)")]
   [SwaggerResponse(200, "Orders was fetched successfully", typeof(Paged<Order>))]
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetOrders(
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
@@ -86,6 +87,8 @@ public class OrdersModule : IModule {
     }
 
     Paged<OrderDto> orders;
+
+    var op = Operation.Begin("Fetching orders");
 
     if (dateRangeParsed is not null)
     {
@@ -113,12 +116,15 @@ public class OrdersModule : IModule {
         .Select(o => mappers.Cut(o)), pageNumber, count);
     }
 
+    op.Complete();
+
     return TypedResults.Ok(orders);
   }
 
   [SwaggerOperation(Summary = "Gets detail of order")]
   [SwaggerResponse(200, "Order was returned successfully", typeof(Order))]
   [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetOrdersDetails([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
     using var op = Operation.Begin("Requesting order with Id = {Id}", id);
     var order = await db.Orders
@@ -138,6 +144,7 @@ public class OrdersModule : IModule {
   [SwaggerOperation(Summary = "Creates new order")]
   [SwaggerResponse(201, "Order was created successfully", typeof(Order))]
   [SwaggerResponse(404, "Some entity was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private static async Task<IResult> CreateOrder(
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateOrderRequestBody> validator,
@@ -180,13 +187,23 @@ public class OrdersModule : IModule {
   [SwaggerOperation(Summary = "Marks order as deleted")]
   [SwaggerResponse(204, "Order was marked as deleted successfully")]
   [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(409, "Order was already deleted", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> MarkOrderAsDeleted([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+    var op = Operation.Begin("Deleting order");
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
+
+    if (order.IsDeleted)
+    {
+      throw new EntityIsAlreadyDeletedException(nameof(Order), id);
+    }
 
     order.IsDeleted = true;
 
     await db.SaveChangesAsync();
+
+    op.Complete();
 
     return TypedResults.NoContent();
   }
@@ -194,10 +211,18 @@ public class OrdersModule : IModule {
   [SwaggerOperation(Summary = "Marks order as not deleted")]
   [SwaggerResponse(200, "Order was returned from trash successfully")]
   [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(409, "Order was already restored", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> MarkOrderAsNotDeleted([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
 
+
+    if (!order.IsDeleted)
+    {
+      throw new EntityIsAlreadyRestoredException(nameof(Order), id);
+    }
+    
     order.IsDeleted = false;
 
     await db.SaveChangesAsync();
@@ -208,6 +233,7 @@ public class OrdersModule : IModule {
   [SwaggerOperation(Summary = "Updates order")]
   [SwaggerResponse(200, "Order was updated successfully", typeof(Order))]
   [SwaggerResponse(404, "Some entity was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> UpdateOrder(
     [FromServices] ApplicationDbContext db,
     [FromRoute] Guid id,
@@ -215,9 +241,11 @@ public class OrdersModule : IModule {
   ) {
     // TODO: Валидация
 
+    var op = Operation.Begin("Updating order");
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
 
+    var infoFetchOp = Operation.Begin("Fetching related entities for order updating");
     order.Date = body.Date;
     var newStatus = await db.MovementStatuses.FindAsync(body.MovementStatusId) ??
       throw new EntityWasNotFoundException(nameof(MovementStatus), body.MovementStatusId);
@@ -243,6 +271,9 @@ public class OrdersModule : IModule {
       });
     }
 
+    op.Complete();
+
+    var diffCalculatingOp = Operation.Begin("Calculating difference");
     var diff = order.Items.GetDifferencesFrom(items);
 
     foreach (var item in diff)
@@ -258,7 +289,11 @@ public class OrdersModule : IModule {
     
     order.Items = order.Items.ApplyDifferences(diff);
 
+    diffCalculatingOp.Complete();
+
     await db.SaveChangesAsync();
+
+    op.Complete();
 
     return TypedResults.Ok(order);
   }

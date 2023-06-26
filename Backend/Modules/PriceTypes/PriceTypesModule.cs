@@ -50,6 +50,7 @@ public class PriceTypesModule : IModule {
 
   [SwaggerOperation(Summary = "Gets all available price types")]
   [SwaggerResponse(200, "Price types was returned successfully", typeof(List<PriceType>))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetAllPriceTypesHandler([FromServices] ApplicationDbContext db) {
     using var op = Operation.Begin("Requesting price types");
     var priceTypes = await db.PriceTypes.ToListAsync();

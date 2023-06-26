@@ -55,6 +55,7 @@ public class ShipmentsModule : IModule {
 
     module.MapGet("", GetShipments);
     module.MapGet("{id:guid}", GetShipmentDetails);
+    module.MapPost("", CreateShipment);
 
     return endpoints;
   }

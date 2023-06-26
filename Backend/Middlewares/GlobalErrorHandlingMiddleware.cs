@@ -128,6 +128,21 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
       context.Response.ContentType = MediaTypeNames.Application.Json;
       await context.Response.WriteAsync(json);
     }
+    catch (InvalidFormatOfDateRangeStringException e)
+    {
+      Log.Information("Unable to parse date range: {DateRangeString}", e.InvalidString);
+
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.BadRequest,
+        Title = $"Could not parse provided date range string {e.InvalidString}",
+        Detail = $"Required format is YYYY-MM-DD:YYYY-MM-DD",
+      };
+      var json = JsonSerializer.Serialize(problemDetails);
+
+      context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+      await context.Response.WriteAsync(json);
+    }
     catch (Exception e)
     {
       Log.Error(

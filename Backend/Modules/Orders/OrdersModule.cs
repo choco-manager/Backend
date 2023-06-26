@@ -82,7 +82,7 @@ public class OrdersModule : IModule {
   ) {
     if (!DateRange.TryParse(dateRange, out var dateRangeParsed))
     {
-      return TypedResults.BadRequest(dateRange);
+      throw new InvalidFormatOfDateRangeStringException(dateRange);
     }
 
     Paged<OrderDto> orders;

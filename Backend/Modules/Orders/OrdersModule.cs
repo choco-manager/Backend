@@ -68,7 +68,7 @@ public class OrdersModule : IModule {
   }
 
   [SwaggerOperation(Summary = "Gets all available orders (with pagination and filtering by date)")]
-  [SwaggerResponse(200, "Orders was fetched successfully", typeof(Paged<Order>))]
+  [SwaggerResponse(200, "Orders was fetched successfully", typeof(Paged<OrderDto>))]
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetOrders(

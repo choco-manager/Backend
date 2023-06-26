@@ -78,31 +78,32 @@ public class ShipmentsModule : IModule {
       throw new InvalidFormatOfDateRangeStringException(dateRange);
     }
 
-    // TODO: add dto
-    Paged<Shipment> shipments;
+    Paged<ShipmentDto> shipments;
 
     var op = Operation.Begin("Fetching shipments");
 
     if (dateRangeParsed is not null)
     {
-      shipments = await Paged<Shipment>.Split(
+      shipments = await Paged<ShipmentDto>.Split(
         db.Shipments
           .Where(s => s.Date >= dateRangeParsed.StartDate && s.Date <= dateRangeParsed.EndDate)
           .OrderByDescending(s => s.Date)
           .Include(s => s.Status)
           .Include(s => s.Items)
-          .ThenInclude(mi => mi.Product),
+          .ThenInclude(mi => mi.Product)
+          .Select(s => mappers.Cut(s)),
         pageNumber,
         count);
     }
     else
     {
-      shipments = await Paged<Shipment>.Split(
+      shipments = await Paged<ShipmentDto>.Split(
         db.Shipments
           .OrderByDescending(s => s.Date)
           .Include(s => s.Status)
           .Include(s => s.Items)
-          .ThenInclude(mi => mi.Product),
+          .ThenInclude(mi => mi.Product)
+          .Select(s => mappers.Cut(s)),
         pageNumber,
         count);
     }

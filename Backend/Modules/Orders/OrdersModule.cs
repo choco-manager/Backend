@@ -23,6 +23,7 @@
 using Backend.Data;
 using Backend.Data.DateRange;
 using Backend.Data.Extensions;
+using Backend.Data.Pagination;
 using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Clients.Contract;
@@ -67,13 +68,13 @@ public class OrdersModule : IModule {
   }
 
   [SwaggerOperation(Summary = "Gets all available orders (with pagination and filtering by date)")]
-  [SwaggerResponse(200, "Orders was fetched successfully", typeof(List<Order>))]
+  [SwaggerResponse(200, "Orders was fetched successfully", typeof(Paged<Order>))]
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
   private async Task<IResult> GetOrders(
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
-    [FromQuery] [SwaggerParameter("Amount of orders to skip from top (ordered by date in descending order)")]
-    int offset = 0,
+    [FromQuery] [SwaggerParameter("Number of page (ordered by date in descending order)")]
+    int pageNumber = 0,
     [FromQuery] [SwaggerParameter("Amount of orders to take from top (ordered by date in descending order)")]
     int count = 5,
     [FromQuery] [SwaggerParameter("Range of dates to take orders in from. Example: 2023-06-01:2023-06-10")]
@@ -84,38 +85,32 @@ public class OrdersModule : IModule {
       return TypedResults.BadRequest(dateRange);
     }
 
-    List<OrderDto> orders;
+    Paged<OrderDto> orders;
 
     if (dateRangeParsed is not null)
     {
-      orders = await db.Orders
+      orders = await Paged<OrderDto>.Split(db.Orders
         .Where(o => o.Date >= dateRangeParsed.StartDate && o.Date <= dateRangeParsed.EndDate)
         .OrderByDescending(o => o.Date)
-        .Skip(offset)
-        .Take(count)
         .Include(o => o.Client)
         .Include(o => o.Status)
         .Include(o => o.Items)
         .ThenInclude(i => i.Product)
         .Include(o => o.SelectedAddress)
         .ThenInclude(a => a.City)
-        .Select(o => mappers.Cut(o))
-        .ToListAsync();
+        .Select(o => mappers.Cut(o)), pageNumber, count);
     }
     else
     {
-      orders = await db.Orders
+      orders = await Paged<OrderDto>.Split(db.Orders
         .OrderByDescending(o => o.Date)
-        .Skip(offset)
-        .Take(count)
         .Include(o => o.Client)
         .Include(o => o.Status)
         .Include(o => o.Items)
         .ThenInclude(i => i.Product)
         .Include(o => o.SelectedAddress)
         .ThenInclude(a => a.City)
-        .Select(o => mappers.Cut(o))
-        .ToListAsync();
+        .Select(o => mappers.Cut(o)), pageNumber, count);
     }
 
     return TypedResults.Ok(orders);

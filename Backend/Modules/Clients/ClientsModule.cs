@@ -22,6 +22,7 @@
 
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
+using Backend.Data.Pagination;
 using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Clients.Contract;
@@ -47,7 +48,7 @@ public class ClientsModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
     builder.AddSingleton<AbstractValidator<UpdateClientRequestBody>, UpdateClientRequestBodyValidator>();
     builder.AddSingleton<ClientUtils>();
-    
+
     return builder;
   }
 
@@ -70,19 +71,16 @@ public class ClientsModule : IModule {
   private async Task<IResult> GetClients(
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
-    [FromQuery] int offset = 0,
+    [FromQuery] int pageNumber = 0,
     [FromQuery] int count = 5
   ) {
     using var op = Operation.Begin("Requesting clients");
-    var addresses = await db.Clients
+    var clients = await Paged<ClientDto>.Split(db.Clients
       .OrderBy(c => c.LastName)
-      .Skip(offset)
-      .Take(count)
-      .Select(c => mappers.Cut(c))
-      .ToListAsync();
+      .Select(c => mappers.Cut(c)), pageNumber, count);
     op.Complete();
-    Log.Information("Fetched {Count} clients", addresses.Count);
-    return TypedResults.Ok(addresses);
+    Log.Information("Fetched {Count} clients", clients.TotalCount);
+    return TypedResults.Ok(clients);
   }
 
   [SwaggerOperation(Summary = "Gets detail of client")]
@@ -155,7 +153,7 @@ public class ClientsModule : IModule {
     [FromServices] ClientUtils utils
   ) {
     await validator.ValidateAndThrowAsync(body);
-    
+
     using var clientOp = Operation.Begin("Requesting client with Id = {Id}", id);
     var client = await db.Clients
       .Where(c => c.Id == id)

@@ -21,6 +21,7 @@
 
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
+using Backend.Data.Pagination;
 using Backend.Exceptions;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
@@ -65,17 +66,14 @@ public class AddressesModule : IModule {
   [SwaggerResponse(200, "Addresses was returned successfully", typeof(List<Address>))]
   private async Task<IResult> GetAddresses(
     [FromServices] ApplicationDbContext db,
-    [FromQuery] int offset = 0,
+    [FromQuery] int pageNumber = 0,
     [FromQuery] int count = 5
   ) {
     using var op = Operation.Begin("Requesting addresses");
-    var addresses = await db.Addresses
-      .Skip(offset)
-      .Take(count)
-      .Include(a => a.City)
-      .ToListAsync();
+    var addresses = await Paged<Address>.Split(db.Addresses
+      .Include(a => a.City), pageNumber, count);
     op.Complete();
-    Log.Information("Fetched {Count} addresses", addresses.Count);
+    Log.Information("Fetched {Count} addresses", addresses.TotalCount);
     return TypedResults.Ok(addresses);
   }
 

@@ -22,6 +22,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
+using Backend.Data.Pagination;
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
 
@@ -72,12 +73,12 @@ public class AddressesModuleTests {
   public async Task GetAddresses__Returns200() {
     // Act
     var response = await _client.GetAsync("/api/addresses");
-    var addresses = await response.Content.ReadFromJsonAsync<List<Address>>();
+    var addresses = await response.Content.ReadFromJsonAsync<Paged<Address>>();
 
     // Assert
     response.StatusCode.Should().Be(HttpStatusCode.OK);
     addresses.Should().NotBeNull();
-    addresses?.Count.Should().Be(5);
+    addresses?.PageSize.Should().Be(5);
   }
 
   [Test(Description = "Method to create new order should create new order and return it")]
@@ -109,8 +110,8 @@ public class AddressesModuleTests {
   public async Task CreateAddress__Returns200() {
     // Arrrange
     var response = await _client.GetAsync("/api/addresses");
-    var addresses = await response.Content.ReadFromJsonAsync<List<Address>>();
-    var address = addresses[0];
+    var addresses = await response.Content.ReadFromJsonAsync<Paged<Address>>();
+    var address = addresses.Data[0];
 
     var rb = new CreateAddressRequestBody {
       City = address.City.Id,

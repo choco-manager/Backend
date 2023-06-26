@@ -23,6 +23,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
+using Backend.Data.Pagination;
 using Backend.Modules.Clients.Contract;
 
 using FluentAssertions;
@@ -72,12 +73,12 @@ public class ClientsModuleTests {
   public async Task GetClients__Returns200() {
     // Act
     var response = await _client.GetAsync("/api/clients");
-    var addresses = await response.Content.ReadFromJsonAsync<List<ClientDto>>();
+    var addresses = await response.Content.ReadFromJsonAsync<Paged<ClientDto>>();
 
     // Assert
     response.StatusCode.Should().Be(HttpStatusCode.OK);
     addresses.Should().NotBeNull();
-    addresses?.Count.Should().Be(5);
+    addresses?.PageSize.Should().Be(5);
   }
 
   [Test(Description = "Method to create new client should return status code 201 and created client")]

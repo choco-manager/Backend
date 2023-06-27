@@ -272,7 +272,7 @@ public class OrdersModule : IModule {
       });
     }
 
-    op.Complete();
+    infoFetchOp.Complete();
 
     var diffCalculatingOp = Operation.Begin("Calculating difference");
     var diff = order.Items.GetDifferencesFrom(items);

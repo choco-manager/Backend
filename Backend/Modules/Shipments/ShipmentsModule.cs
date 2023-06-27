@@ -25,6 +25,9 @@ using Backend.Data.DateRange;
 using Backend.Data.Pagination;
 using Backend.Exceptions;
 using Backend.Modules.MovementItems.Contract;
+using Backend.Modules.MovementItems.Utils;
+using Backend.Modules.MovementStatuses.Contract;
+using Backend.Modules.MovementStatuses.Utils;
 using Backend.Modules.Products.Contract;
 using Backend.Modules.Shipments.Contract;
 
@@ -56,6 +59,9 @@ public class ShipmentsModule : IModule {
     module.MapGet("", GetShipments);
     module.MapGet("{id:guid}", GetShipmentDetails);
     module.MapPost("", CreateShipment);
+    module.MapPost("{id:guid}", DeleteShipment);
+    module.MapPost("{id:guid}", RestoreShipment);
+    module.MapPut("{id:guid}", UpdateShipment);
 
     return endpoints;
   }
@@ -133,7 +139,7 @@ public class ShipmentsModule : IModule {
     return TypedResults.Ok(shipment);
   }
 
-  [SwaggerOperation(Summary = "Creates new order")]
+  [SwaggerOperation(Summary = "Creates new shipment")]
   [SwaggerResponse(201, "Shipment was created successfully", typeof(Shipment))]
   [SwaggerResponse(404, "Some entity was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
@@ -171,5 +177,101 @@ public class ShipmentsModule : IModule {
     op.Complete();
 
     return TypedResults.Created("/api/shipments", shipment);
+  }
+
+
+  [SwaggerOperation(Summary = "Marks shipment as deleted")]
+  [SwaggerResponse(204, "Shipment was marked as deleted successfully")]
+  [SwaggerResponse(404, "Shipment was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(409, "Shipment was already deleted", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
+  private async Task<IResult> DeleteShipment([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+    var op = Operation.Begin("Deleting shipment");
+    var shipment = await db.Shipments.FindAsync(id) ?? throw new EntityWasNotFoundException(nameof(Shipment), id);
+
+    if (shipment.IsDeleted)
+    {
+      throw new EntityIsAlreadyDeletedException(nameof(Shipment), id);
+    }
+
+    shipment.IsDeleted = true;
+
+    await db.SaveChangesAsync();
+
+    op.Complete();
+
+    return TypedResults.NoContent();
+  }
+
+
+  [SwaggerOperation(Summary = "Marks shipment as not deleted")]
+  [SwaggerResponse(200, "Shipment was returned from trash successfully")]
+  [SwaggerResponse(404, "Shipment was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(409, "Shipment was already restored", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
+  private async Task<IResult> RestoreShipment([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+    var shipment = await db.Shipments.FindAsync(id) ?? throw new EntityWasNotFoundException(nameof(Shipment), id);
+
+    if (!shipment.IsDeleted)
+    {
+      throw new EntityIsAlreadyDeletedException(nameof(Shipment), id);
+    }
+
+    shipment.IsDeleted = false;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok();
+  }
+
+  [SwaggerOperation(Summary = "Updates shipment")]
+  [SwaggerResponse(200, "Shipment was updated successfully", typeof(Shipment))]
+  [SwaggerResponse(404, "Some entity was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
+  private async Task<IResult> UpdateShipment(
+    [FromServices] ApplicationDbContext db,
+    [FromServices] AbstractValidator<UpdateShipmentRequestBody> validator,
+    [FromRoute] Guid id,
+    [FromBody] UpdateShipmentRequestBody body
+  ) {
+    await validator.ValidateAndThrowAsync(body);
+
+    var op = Operation.Begin("Updating shipment");
+    var shipment = await db.Shipments.FindAsync(id) ?? throw new EntityWasNotFoundException(nameof(Shipment), id);
+
+    var infoFetchOp = Operation.Begin("Fetching related entities for shipment updating");
+
+    shipment.Date = body.Date;
+    var newStatus = await db.MovementStatuses.FindAsync(body.StatusId) ??
+      throw new EntityWasNotFoundException(nameof(MovementStatus), body.StatusId);
+
+    shipment.Status = shipment.Status.IsChangePossible(newStatus)
+      ? newStatus
+      : throw new CouldNotChangeStatusException(shipment.Status, newStatus, nameof(Shipment), id);
+
+    var items = new List<MovementItem>();
+
+    foreach (var item in body.Items)
+    {
+      items.Add(new MovementItem {
+        Amount = item.Amount,
+        Product = await db.Products.FindAsync(item.ProductId) ??
+          throw new EntityWasNotFoundException(nameof(Product), item.ProductId),
+      });
+    }
+
+    infoFetchOp.Complete();
+
+    var diffCalculatingOp = Operation.Begin("Calculating difference");
+    var diff = shipment.Items.GetDifferencesFrom(items);
+
+    shipment.Items = shipment.Items.ApplyDifferences(diff);
+
+    diffCalculatingOp.Complete();
+
+    await db.SaveChangesAsync();
+    op.Complete();
+
+    return TypedResults.Ok(shipment);
   }
 }

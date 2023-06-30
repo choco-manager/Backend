@@ -177,6 +177,23 @@ public class GlobalErrorHandlingMiddleware : IMiddleware {
       context.Response.ContentType = MediaTypeNames.Application.Json;
       await context.Response.WriteAsync(json);
     }
+    catch (NotImplementedException e)
+    {
+      Log.Warning("Requested not implemented method '{MethodName}'", e.TargetSite?.Name);
+
+      var problemDetails = new ProblemDetails {
+        Status = (int)HttpStatusCode.NotImplemented,
+        Title = "Функционал ещё не реализован",
+        Detail = "Запрошенный функционал не был реализован",
+      };
+
+      var json = JsonSerializer.Serialize(problemDetails);
+
+      context.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
+      context.Response.ContentType = MediaTypeNames.Application.Json;
+
+      await context.Response.WriteAsync(json);
+    }
     catch (Exception e)
     {
       Log.Error(

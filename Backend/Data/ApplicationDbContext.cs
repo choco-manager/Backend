@@ -22,6 +22,7 @@
 using Backend.Modules.Addresses.Contract;
 using Backend.Modules.Cities.Contract;
 using Backend.Modules.Clients.Contract;
+using Backend.Modules.Inventories.Contract;
 using Backend.Modules.MovementItems.Contract;
 using Backend.Modules.MovementStatuses.Contract;
 using Backend.Modules.Orders.Contract;
@@ -42,6 +43,7 @@ public class ApplicationDbContext : DbContext {
   public virtual DbSet<Address> Addresses => Set<Address>();
   public virtual DbSet<City> Cities => Set<City>();
   public virtual DbSet<Client> Clients => Set<Client>();
+  public virtual DbSet<Inventory> Inventories => Set<Inventory>();
   public virtual DbSet<MovementItem> MovementItems => Set<MovementItem>();
   public virtual DbSet<MovementStatus> MovementStatuses => Set<MovementStatus>();
   public virtual DbSet<Order> Orders => Set<Order>();

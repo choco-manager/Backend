@@ -30,6 +30,6 @@ namespace Backend.Modules.MovementItems.Contract;
 public class UpdateMovementItemValidator : AbstractValidator<UpdateMovementItem> {
   public UpdateMovementItemValidator() {
     RuleFor(mi => mi.ProductId).NotNull().NotEmpty().NotEqual(Guid.Empty);
-    RuleFor(mi => mi.Amount).GreaterThan(0);
+    RuleFor(mi => mi.Amount).GreaterThanOrEqualTo(0);
   }
 }

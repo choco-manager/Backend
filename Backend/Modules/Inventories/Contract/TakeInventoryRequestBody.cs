@@ -28,5 +28,5 @@ using Backend.Modules.MovementItems.Contract;
 namespace Backend.Modules.Inventories.Contract;
 
 public class TakeInventoryRequestBody {
-  public List<MovementItem> Items { get; set; }
+  public List<UpdateMovementItem> Items { get; set; }
 }

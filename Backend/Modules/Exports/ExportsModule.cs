@@ -20,9 +20,14 @@
 
 #region
 
+using System.Net.Mime;
+
 using Backend.Data;
+using Backend.Data.Extensions;
+using Backend.Modules.Exports.Utils;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 #endregion
 
@@ -31,6 +36,7 @@ namespace Backend.Modules.Exports;
 
 public class ExportsModule : IModule {
   public IServiceCollection RegisterModule(IServiceCollection builder) {
+    builder.AddSingleton<IExportUtils, ExportUtils>();
     return builder;
   }
 
@@ -42,7 +48,25 @@ public class ExportsModule : IModule {
     return endpoints;
   }
 
-  private async Task<IResult> ExportImage([FromServices] ApplicationDbContext db) {
-    return TypedResults.Ok();
+  private async Task<IResult> ExportImage(
+    [FromServices] ApplicationDbContext db,
+    [FromServices] IExportUtils utils,
+    [FromServices] Mappers mappers
+  ) {
+    var products = await db.Products
+      .Where(p => !p.IsDeleted)
+      .Include(p => p.Category)
+      .OrderBy(p => p.Name)
+      .Select(product => mappers.Cut(product, 0))
+      .ToListAsync();
+
+    foreach (var product in products)
+    {
+      product.Leftover = await db.MovementItems.GetLeftoverFor(product.Id);
+    }
+
+    var image = utils.GenerateImage(products.Where(p => p.Leftover > decimal.Zero).ToList()).ToArray();
+
+    return TypedResults.File(image, MediaTypeNames.Image.Jpeg);
   }
 }

@@ -3,10 +3,11 @@ name: .NET
 on:
   push:
     branches: [ "master" ]
-    paths: ["**.cs"]
+    paths: ["**.cs", "Dockerfile", "**.csproj"]
   pull_request:
     branches: [ "master" ]
-    paths: ["**.cs"]
+    paths: ["**.cs", "Dockerfile", "**.csproj"]
+  workflow_dispatch: {}
 
 jobs:
   build:

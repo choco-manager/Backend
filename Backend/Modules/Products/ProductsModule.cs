@@ -90,7 +90,8 @@ public class ProductsModule : IModule {
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetProductDetails(
-    [FromRoute] Guid id,
+    [FromRoute] [SwaggerParameter("Id of product to get details for")]
+    Guid id,
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers
   ) {
@@ -99,7 +100,7 @@ public class ProductsModule : IModule {
       .Where(p => p.Id == id)
       .Include(p => p.Category)
       .FirstOrDefaultAsync() ?? throw new EntityWasNotFoundException(nameof(Product), id);
-    
+
     productOp.Complete();
 
     using var pricesOp = Operation.Begin("Collecting prices change history of product with Id = {Id}", id);
@@ -129,9 +130,11 @@ public class ProductsModule : IModule {
   [SwaggerOperation(Summary = "Marks product as deleted")]
   [SwaggerResponse(204, "Product was successfully marked as deleted")]
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(409, "Product was already marked as deleted", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> DeleteProduct(
-    [FromRoute] Guid id,
+    [FromRoute] [SwaggerParameter("Id of product to mark as delete")]
+    Guid id,
     [FromServices] ApplicationDbContext db
   ) {
     using var op = Operation.Begin("Deleting product with Id = {Id}", id);
@@ -154,9 +157,11 @@ public class ProductsModule : IModule {
   [SwaggerOperation(Summary = "Marks product as not deleted")]
   [SwaggerResponse(204, "Product was successfully marked as not deleted")]
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(409, "Product was already marked as not deleted", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> RestoreProduct(
-    [FromRoute] Guid id,
+    [FromRoute] [SwaggerParameter("Id of product to mark as not deleted")]
+    Guid id,
     [FromServices] ApplicationDbContext db
   ) {
     using var op = Operation.Begin("Restoring product with Id = {Id}", id);
@@ -167,7 +172,7 @@ public class ProductsModule : IModule {
     {
       throw new EntityIsAlreadyRestoredException(nameof(Product), id);
     }
-    
+
     product.IsDeleted = false;
 
     await db.SaveChangesAsync();
@@ -182,8 +187,12 @@ public class ProductsModule : IModule {
   [SwaggerResponse(404, "Product was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> UpdateProduct(
-    [FromRoute] Guid id,
-    [FromBody] UpdateProductRequestBody body,
+    [FromRoute] [SwaggerParameter("Id of product to update")]
+    Guid id,
+    [FromBody]
+    [SwaggerRequestBody(
+      "Parameters of product to change (full model required, all fields are replaced with new provided values)")]
+    UpdateProductRequestBody body,
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
     [FromServices] AbstractValidator<UpdateProductRequestBody> validator
@@ -191,7 +200,7 @@ public class ProductsModule : IModule {
     await validator.ValidateAndThrowAsync(body);
 
     var op = Operation.Begin("Updating product");
-    
+
     var product = await db.Products
       .Include(p => p.Category)
       .Where(p => p.Id == id)
@@ -239,7 +248,8 @@ public class ProductsModule : IModule {
   [SwaggerResponse(400, "Invalid body", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> CreateProduct(
-    [FromBody] UpdateProductRequestBody body,
+    [FromBody] [SwaggerRequestBody("Model of product to create")]
+    UpdateProductRequestBody body,
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateProductRequestBody> validator
   ) {

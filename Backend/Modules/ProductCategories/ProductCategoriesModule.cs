@@ -69,7 +69,8 @@ public class ProductCategoriesModule : IModule {
   [SwaggerResponse(201, "Product category was created successfully", typeof(ProductCategory))]
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
   private async Task<IResult> CreateProductCategoryHandler(
-    [FromBody] CreateProductCategoryRequestBody body,
+    [FromBody] [SwaggerRequestBody("Name of product category to create")]
+    CreateProductCategoryRequestBody body,
     [FromServices] AbstractValidator<CreateProductCategoryRequestBody> validator,
     [FromServices] Mappers mapper,
     [FromServices] ApplicationDbContext db

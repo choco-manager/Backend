@@ -63,12 +63,14 @@ public class AddressesModule : IModule {
   }
 
   [SwaggerOperation(Summary = "Gets all available addresses (with pagination)")]
-  [SwaggerResponse(200, "Addresses was returned successfully", typeof(List<Address>))]
+  [SwaggerResponse(200, "Addresses was returned successfully", typeof(Paged<Address>))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetAddresses(
     [FromServices] ApplicationDbContext db,
-    [FromQuery] int pageNumber = 0,
-    [FromQuery] int count = 5
+    [FromQuery] [SwaggerParameter("Number of page to fetch")]
+    int pageNumber = 0,
+    [FromQuery] [SwaggerParameter("Amount of elements on one page")]
+    int count = 5
   ) {
     using var op = Operation.Begin("Requesting addresses");
     var addresses = await Paged<Address>.Split(db.Addresses
@@ -84,7 +86,8 @@ public class AddressesModule : IModule {
   [SwaggerResponse(400, "Invalid data was passed", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> CreateAddress(
-    [FromBody] CreateAddressRequestBody body,
+    [FromBody] [SwaggerRequestBody("Parameters to create or get address")]
+    CreateAddressRequestBody body,
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<CreateAddressRequestBody> validator
   ) {
@@ -112,7 +115,7 @@ public class AddressesModule : IModule {
 
 
     var createAddressOp = Operation.Begin("Creating new address");
-    
+
     var createdAddress = new Address {
       City = city,
       Street = body.Street,

@@ -125,7 +125,11 @@ public class ShipmentsModule : IModule {
   [SwaggerResponse(200, "Shipment was returned successfully", typeof(Shipment))]
   [SwaggerResponse(404, "Shipment was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
-  private async Task<IResult> GetShipmentDetails([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+  private async Task<IResult> GetShipmentDetails(
+    [FromServices] ApplicationDbContext db,
+    [FromRoute] [SwaggerParameter("Id of shipment to get details for")]
+    Guid id
+  ) {
     using var op = Operation.Begin("Requesting shipment with Id = {id}", id);
 
     var shipment = await db.Shipments
@@ -146,7 +150,8 @@ public class ShipmentsModule : IModule {
   private async Task<IResult> CreateShipment(
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateShipmentRequestBody> validator,
-    [FromBody] UpdateShipmentRequestBody body
+    [FromBody] [SwaggerRequestBody("Model of shipment to create")]
+    UpdateShipmentRequestBody body
   ) {
     await validator.ValidateAndThrowAsync(body);
 
@@ -185,7 +190,11 @@ public class ShipmentsModule : IModule {
   [SwaggerResponse(404, "Shipment was not found", typeof(ProblemDetails))]
   [SwaggerResponse(409, "Shipment was already deleted", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
-  private async Task<IResult> DeleteShipment([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+  private async Task<IResult> DeleteShipment(
+    [FromServices] ApplicationDbContext db,
+    [FromRoute] [SwaggerParameter("Id of shipment to mark as deleted")]
+    Guid id
+  ) {
     var op = Operation.Begin("Deleting shipment");
     var shipment = await db.Shipments.FindAsync(id) ?? throw new EntityWasNotFoundException(nameof(Shipment), id);
 
@@ -209,7 +218,11 @@ public class ShipmentsModule : IModule {
   [SwaggerResponse(404, "Shipment was not found", typeof(ProblemDetails))]
   [SwaggerResponse(409, "Shipment was already restored", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
-  private async Task<IResult> RestoreShipment([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+  private async Task<IResult> RestoreShipment(
+    [FromServices] ApplicationDbContext db,
+    [FromRoute] [SwaggerParameter("Id of shipment to mark as not deleted")]
+    Guid id
+  ) {
     var shipment = await db.Shipments.FindAsync(id) ?? throw new EntityWasNotFoundException(nameof(Shipment), id);
 
     if (!shipment.IsDeleted)
@@ -231,8 +244,12 @@ public class ShipmentsModule : IModule {
   private async Task<IResult> UpdateShipment(
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateShipmentRequestBody> validator,
-    [FromRoute] Guid id,
-    [FromBody] UpdateShipmentRequestBody body
+    [FromRoute] [SwaggerParameter("Id of shipment to update")]
+    Guid id,
+    [FromBody]
+    [SwaggerRequestBody(
+      "Parameters of shipment to change (full model required, all fields are replaced with new provided values)")]
+    UpdateShipmentRequestBody body
   ) {
     await validator.ValidateAndThrowAsync(body);
 

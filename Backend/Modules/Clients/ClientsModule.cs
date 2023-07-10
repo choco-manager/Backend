@@ -67,13 +67,15 @@ public class ClientsModule : IModule {
   }
 
   [SwaggerOperation(Summary = "Gets all available clients (with pagination)")]
-  [SwaggerResponse(200, "Clients was returned successfully", typeof(List<ClientDto>))]
+  [SwaggerResponse(200, "Clients was returned successfully", typeof(Paged<ClientDto>))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetClients(
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
-    [FromQuery] int pageNumber = 0,
-    [FromQuery] int count = 5
+    [FromQuery] [SwaggerParameter("Number of page to fetch")]
+    int pageNumber = 0,
+    [FromQuery] [SwaggerParameter("Amount of elements on one page")]
+    int count = 5
   ) {
     using var op = Operation.Begin("Requesting clients");
     var clients = await Paged<ClientDto>.Split(db.Clients
@@ -89,7 +91,8 @@ public class ClientsModule : IModule {
   [SwaggerResponse(404, "Client was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> GetClientDetails(
-    [FromRoute] Guid id,
+    [FromRoute] [SwaggerParameter("Id of client to get detailed information for")]
+    Guid id,
     [FromServices] ApplicationDbContext db
   ) {
     using var clientOp = Operation.Begin("Requesting client with Id = {Id}", id);
@@ -109,7 +112,8 @@ public class ClientsModule : IModule {
   [SwaggerResponse(404, "Address was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> CreateClient(
-    [FromBody] UpdateClientRequestBody body,
+    [FromBody] [SwaggerRequestBody("Model of client to create")]
+    UpdateClientRequestBody body,
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateClientRequestBody> validator
   ) {
@@ -150,8 +154,12 @@ public class ClientsModule : IModule {
   [SwaggerResponse(404, "Client was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> UpdateClient(
-    [FromRoute] Guid id,
-    [FromBody] UpdateClientRequestBody body,
+    [FromRoute] [SwaggerParameter("Id of client to update")]
+    Guid id,
+    [FromBody]
+    [SwaggerRequestBody(
+      "Parameters of client to change (full model required, all fields are replaced with new provided values)")]
+    UpdateClientRequestBody body,
     [FromServices] ApplicationDbContext db,
     [FromServices] Mappers mappers,
     [FromServices] AbstractValidator<UpdateClientRequestBody> validator,

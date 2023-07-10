@@ -29,6 +29,8 @@ using Backend.Modules.Exports.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+using Swashbuckle.AspNetCore.Annotations;
+
 #endregion
 
 
@@ -48,6 +50,11 @@ public class ExportsModule : IModule {
     return endpoints;
   }
 
+  [SwaggerOperation(
+    "Generates image with leftovers and retail prices of products",
+    "Should not include deleted products or those, which have leftover less or equal to zero")]
+  [SwaggerResponse(200, "Image was generated successfully", ContentTypes = new[] { MediaTypeNames.Image.Jpeg })]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> ExportImage(
     [FromServices] ApplicationDbContext db,
     [FromServices] IExportUtils utils,

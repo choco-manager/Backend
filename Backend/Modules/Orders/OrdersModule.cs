@@ -125,7 +125,11 @@ public class OrdersModule : IModule {
   [SwaggerResponse(200, "Order was returned successfully", typeof(Order))]
   [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
-  private async Task<IResult> GetOrdersDetails([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+  private async Task<IResult> GetOrdersDetails(
+    [FromServices] ApplicationDbContext db,
+    [FromRoute] [SwaggerParameter("Id of order to get details for")]
+    Guid id
+  ) {
     using var op = Operation.Begin("Requesting order with Id = {Id}", id);
     var order = await db.Orders
         .Include(o => o.Client)
@@ -148,7 +152,10 @@ public class OrdersModule : IModule {
   private static async Task<IResult> CreateOrder(
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateOrderRequestBody> validator,
-    [FromBody] UpdateOrderRequestBody body
+    [FromBody]
+    [SwaggerRequestBody(
+      "Model of order to create")]
+    UpdateOrderRequestBody body
   ) {
     await validator.ValidateAndThrowAsync(body);
 
@@ -189,7 +196,11 @@ public class OrdersModule : IModule {
   [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
   [SwaggerResponse(409, "Order was already deleted", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
-  private async Task<IResult> MarkOrderAsDeleted([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+  private async Task<IResult> MarkOrderAsDeleted(
+    [FromServices] ApplicationDbContext db,
+    [FromRoute] [SwaggerParameter("Id of order to mark as deleted")]
+    Guid id
+  ) {
     var op = Operation.Begin("Deleting order");
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
@@ -213,7 +224,11 @@ public class OrdersModule : IModule {
   [SwaggerResponse(404, "Order was not found", typeof(ProblemDetails))]
   [SwaggerResponse(409, "Order was already restored", typeof(ProblemDetails))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
-  private async Task<IResult> MarkOrderAsNotDeleted([FromServices] ApplicationDbContext db, [FromRoute] Guid id) {
+  private async Task<IResult> MarkOrderAsNotDeleted(
+    [FromServices] ApplicationDbContext db,
+    [FromRoute] [SwaggerParameter("Id of order to mark as not deleted")]
+    Guid id
+  ) {
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
 
@@ -222,7 +237,7 @@ public class OrdersModule : IModule {
     {
       throw new EntityIsAlreadyRestoredException(nameof(Order), id);
     }
-    
+
     order.IsDeleted = false;
 
     await db.SaveChangesAsync();
@@ -237,11 +252,15 @@ public class OrdersModule : IModule {
   private async Task<IResult> UpdateOrder(
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<UpdateOrderRequestBody> validator,
-    [FromRoute] Guid id,
-    [FromBody] UpdateOrderRequestBody body
+    [FromRoute] [SwaggerParameter("Id of client to update")]
+    Guid id,
+    [FromBody]
+    [SwaggerRequestBody(
+      "Parameters of order to change (full model required, all fields are replaced with new provided values)")]
+    UpdateOrderRequestBody body
   ) {
     await validator.ValidateAndThrowAsync(body);
-    
+
     var op = Operation.Begin("Updating order");
     var order = await db.Orders.FindAsync(id) ??
       throw new EntityWasNotFoundException(nameof(Order), id);
@@ -287,7 +306,7 @@ public class OrdersModule : IModule {
         throw new InsufficientProductLeftoverException(product, leftover, item.Amount);
       }
     }
-    
+
     order.Items = order.Items.ApplyDifferences(diff);
 
     diffCalculatingOp.Complete();

@@ -31,6 +31,8 @@ using FluentValidation;
 
 using Microsoft.AspNetCore.Mvc;
 
+using Swashbuckle.AspNetCore.Annotations;
+
 #endregion
 
 
@@ -50,10 +52,15 @@ public class InventoriesModule : IModule {
     return endpoints;
   }
 
+  [SwaggerOperation("Takes inventory of products", "Replaces leftovers of products with provided ones")]
+  [SwaggerResponse(201, "Inventory was taken successfully")]
+  [SwaggerResponse(404, "One or more products was not found", typeof(ProblemDetails))]
+  [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]
   private async Task<IResult> TakeInventory(
     [FromServices] ApplicationDbContext db,
     [FromServices] AbstractValidator<TakeInventoryRequestBody> validator,
-    [FromBody] TakeInventoryRequestBody body
+    [FromBody] [SwaggerRequestBody("List of products to apply new leftovers for")]
+    TakeInventoryRequestBody body
   ) {
     await validator.ValidateAndThrowAsync(body);
 

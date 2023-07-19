@@ -89,7 +89,7 @@ public class ProductsModuleTests {
     var productsList = await getResponse.Content.ReadFromJsonAsync<List<ProductDto>>();
 
 
-    var deleteResponse = await _client.PostAsync($"/api/products/{productsList[0].Id}/delete", null);
+    var deleteResponse = await _client.PatchAsync($"/api/products/{productsList[0].Id}/delete", null);
     deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
     getResponse = await _client.GetAsync($"/api/products/{productsList[0].Id}");
@@ -106,7 +106,7 @@ public class ProductsModuleTests {
     var productsList = await getResponse.Content.ReadFromJsonAsync<List<ProductDto>>();
 
 
-    var deleteResponse = await _client.PostAsync($"/api/products/{productsList[0].Id}/restore", null);
+    var deleteResponse = await _client.PatchAsync($"/api/products/{productsList[0].Id}/restore", null);
     deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
     getResponse = await _client.GetAsync($"/api/products/{productsList[0].Id}");

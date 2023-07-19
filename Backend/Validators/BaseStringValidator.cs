@@ -17,19 +17,19 @@
 // ------------------------------------------------------------------------
 // 
 
-#region
-
-using Backend.Validators;
 
 using FluentValidation;
 
-#endregion
 
+namespace Backend.Validators;
 
-namespace Backend.Modules.Cities.Contract;
-
-public class CityRequestBodyValidator : AbstractValidator<CreateCityRequestBody> {
-  public CityRequestBodyValidator() {
-    RuleFor(city => city.Name).SetValidator(new BaseStringValidator());
+public class BaseStringValidator : AbstractValidator<string> {
+  public BaseStringValidator() {
+    RuleFor(s => s)
+      .NotEmpty().WithMessage("Строка не может быть пустой")
+      .NotNull().WithMessage("Строка не может быть пустой")
+      .MinimumLength(3).WithMessage("Строка не может быть короче трёх символов")
+      .Matches(@"^\p{L}+$")
+      .WithMessage("Строка не может содержать специальных символов и цифр");
   }
 }

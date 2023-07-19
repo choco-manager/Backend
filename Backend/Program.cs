@@ -24,6 +24,7 @@ using System.Net;
 using Backend.Data;
 using Backend.Middlewares;
 using Backend.Modules;
+using Backend.SwaggerConfiguration.Filters;
 
 using LettuceEncrypt;
 
@@ -82,6 +83,7 @@ public partial class Program {
             { Name = "GNU GPLv3", Url = new Uri("https://choosealicense.com/licenses/gpl-3.0/", UriKind.Absolute) },
         });
       options.EnableAnnotations();
+      options.DocumentFilter<HideFromSwaggerFilter>();
     });
     builder.Services.AddAuthorization();
 

@@ -20,6 +20,7 @@
 
 #region
 
+using Backend.Attributes;
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
 using Backend.Data.Pagination;
@@ -200,6 +201,7 @@ public class ClientsModule : IModule {
     return TypedResults.Ok(client);
   }
 
+  [HideFromSwagger]
   [SwaggerOperation(Summary = "Generates fake clients")]
   [SwaggerResponse(201, "Clients was generated successfully", typeof(List<Client>))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]

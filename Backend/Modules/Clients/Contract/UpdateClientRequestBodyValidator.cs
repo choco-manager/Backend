@@ -20,6 +20,8 @@
 
 #region
 
+using Backend.Validators;
+
 using FluentValidation;
 
 #endregion
@@ -29,9 +31,9 @@ namespace Backend.Modules.Clients.Contract;
 
 public class UpdateClientRequestBodyValidator : AbstractValidator<UpdateClientRequestBody> {
   public UpdateClientRequestBodyValidator() {
-    RuleFor(b => b.FirstName).NotEmpty().NotNull();
-    RuleFor(b => b.LastName).NotEmpty().NotNull();
+    RuleFor(b => b.FirstName).SetValidator(new BaseStringValidator());
+    RuleFor(b => b.LastName).SetValidator(new BaseOptionalStringValidator());
     RuleFor(b => b.ChatLink).Must(link => Uri.TryCreate(link, UriKind.Absolute, out _));
-    RuleForEach(b => b.Addresses).NotEmpty().NotNull().NotEqual(Guid.Empty);
+    RuleForEach(b => b.Addresses).SetValidator(new BaseGuidValidator());
   }
 }

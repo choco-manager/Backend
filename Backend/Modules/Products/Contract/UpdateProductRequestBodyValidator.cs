@@ -20,6 +20,8 @@
 
 #region
 
+using Backend.Validators;
+
 using FluentValidation;
 
 #endregion
@@ -30,7 +32,7 @@ namespace Backend.Modules.Products.Contract;
 public class UpdateProductRequestBodyValidator : AbstractValidator<UpdateProductRequestBody> {
   public UpdateProductRequestBodyValidator() {
     RuleFor(p => p.Name).NotEmpty().NotNull();
-    RuleFor(p => p.CategoryId).NotEmpty().NotNull().NotEqual(Guid.Empty);
+    RuleFor(p => p.CategoryId).SetValidator(new BaseGuidValidator());
     RuleFor(p => p.RetailPrice).NotNull().GreaterThanOrEqualTo(1);
     RuleFor(p => p.WholesalePrice).NotNull().GreaterThanOrEqualTo(1);
     RuleFor(p => p.IsByWeight).NotNull();

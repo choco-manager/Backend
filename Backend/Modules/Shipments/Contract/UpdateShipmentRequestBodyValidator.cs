@@ -21,6 +21,7 @@
 #region
 
 using Backend.Modules.MovementItems.Contract;
+using Backend.Validators;
 
 using FluentValidation;
 
@@ -31,7 +32,7 @@ namespace Backend.Modules.Shipments.Contract;
 
 public class UpdateShipmentRequestBodyValidator : AbstractValidator<UpdateShipmentRequestBody> {
   public UpdateShipmentRequestBodyValidator() {
-    RuleFor(b => b.StatusId).NotEmpty().NotEqual(Guid.Empty).NotNull();
+    RuleFor(b => b.StatusId).SetValidator(new BaseGuidValidator());
     RuleForEach(o => o.Items).SetValidator(new UpdateMovementItemValidator());
   }
 }

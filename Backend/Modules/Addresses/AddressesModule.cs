@@ -57,6 +57,7 @@ public class AddressesModule : IModule {
 
     module.MapGet("", GetAddresses);
     module.MapPost("", CreateAddress);
+    module.MapPut("fake", GenerateAddresses);
 
     return endpoints;
   }

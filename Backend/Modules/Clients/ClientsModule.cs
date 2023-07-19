@@ -55,7 +55,7 @@ public class ClientsModule : IModule {
   public IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) {
     var module = endpoints
       .MapGroup("/api/clients")
-      .WithDescription("Clients API");
+      .WithTags("Clients API");
 
     module.MapGet("", GetClients);
     module.MapGet("{id:guid}", GetClientDetails);

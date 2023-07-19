@@ -28,6 +28,11 @@ namespace Backend.Modules.Cities.Contract;
 
 public class CityRequestBodyValidator : AbstractValidator<CreateCityRequestBody> {
   public CityRequestBodyValidator() {
-    RuleFor(city => city.Name).NotEmpty().NotNull();
+    RuleFor(city => city.Name)
+      .NotEmpty().WithMessage("Название города не может быть пустым")
+      .NotNull().WithMessage("Название города не может быть пустым")
+      .MinimumLength(3).WithMessage("Название города не может быть короче трёх символов")
+      .Matches(@"^\p{L}+$")
+      .WithMessage("Название города не может содержать специальных символов");
   }
 }

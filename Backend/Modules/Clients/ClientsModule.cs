@@ -60,7 +60,6 @@ public class ClientsModule : IModule {
     module.MapGet("", GetClients);
     module.MapGet("{id:guid}", GetClientDetails);
     module.MapPut("{id:guid}", UpdateClient);
-    module.MapPut("fake", GenerateFakeClients);
     module.MapPost("", CreateClient);
 
     return endpoints;

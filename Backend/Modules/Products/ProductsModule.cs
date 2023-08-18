@@ -57,8 +57,8 @@ public class ProductsModule : IModule {
     var module = endpoints.MapGroup("/api/products").WithTags("Products API");
     module.MapGet("", GetAllProducts);
     module.MapGet("{id:guid}", GetProductDetails);
-    module.MapPost("{id:guid}/delete", DeleteProduct);
-    module.MapPost("{id:guid}/restore", RestoreProduct);
+    module.MapPatch("{id:guid}/delete", DeleteProduct);
+    module.MapPatch("{id:guid}/restore", RestoreProduct);
     module.MapPut("{id:guid}", UpdateProduct);
     module.MapPost("", CreateProduct);
 

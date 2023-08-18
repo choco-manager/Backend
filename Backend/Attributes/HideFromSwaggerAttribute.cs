@@ -18,22 +18,7 @@
 // 
 
 
-#region
+namespace Backend.Attributes;
 
-using Backend.Validators;
-
-using FluentValidation;
-
-#endregion
-
-
-namespace Backend.Modules.Clients.Contract;
-
-public class UpdateClientRequestBodyValidator : AbstractValidator<UpdateClientRequestBody> {
-  public UpdateClientRequestBodyValidator() {
-    RuleFor(b => b.FirstName).SetValidator(new BaseStringValidator());
-    RuleFor(b => b.LastName).SetValidator(new BaseOptionalStringValidator());
-    RuleFor(b => b.ChatLink).Must(link => Uri.TryCreate(link, UriKind.Absolute, out _));
-    RuleForEach(b => b.Addresses).SetValidator(new BaseGuidValidator());
-  }
-}
+[AttributeUsage(AttributeTargets.Method)]
+public class HideFromSwaggerAttribute : Attribute { }

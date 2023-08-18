@@ -18,22 +18,17 @@
 // 
 
 
-#region
-
-using Backend.Validators;
-
 using FluentValidation;
 
-#endregion
 
+namespace Backend.Validators;
 
-namespace Backend.Modules.Clients.Contract;
-
-public class UpdateClientRequestBodyValidator : AbstractValidator<UpdateClientRequestBody> {
-  public UpdateClientRequestBodyValidator() {
-    RuleFor(b => b.FirstName).SetValidator(new BaseStringValidator());
-    RuleFor(b => b.LastName).SetValidator(new BaseOptionalStringValidator());
-    RuleFor(b => b.ChatLink).Must(link => Uri.TryCreate(link, UriKind.Absolute, out _));
-    RuleForEach(b => b.Addresses).SetValidator(new BaseGuidValidator());
+public class BaseOptionalStringValidator : AbstractValidator<string?> {
+  public BaseOptionalStringValidator() {
+    RuleFor(s => s)
+      .NotEmpty().WithMessage("Строка не может быть пустой")
+      .MinimumLength(3).WithMessage("Строка не может быть короче трёх символов")
+      .Matches(@"^\p{L}+$")
+      .WithMessage("Строка не может содержать специальных символов и цифр");
   }
 }

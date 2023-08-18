@@ -19,6 +19,8 @@
 
 #region
 
+using Backend.Validators;
+
 using FluentValidation;
 
 #endregion
@@ -28,6 +30,6 @@ namespace Backend.Modules.Cities.Contract;
 
 public class CityRequestBodyValidator : AbstractValidator<CreateCityRequestBody> {
   public CityRequestBodyValidator() {
-    RuleFor(city => city.Name).NotEmpty().NotNull();
+    RuleFor(city => city.Name).SetValidator(new BaseStringValidator());
   }
 }

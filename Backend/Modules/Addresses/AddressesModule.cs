@@ -19,6 +19,7 @@
 
 #region
 
+using Backend.Attributes;
 using Backend.Data;
 using Backend.Data.FakeDataGeneration;
 using Backend.Data.Pagination;
@@ -130,6 +131,7 @@ public class AddressesModule : IModule {
     return TypedResults.Created("/api/addresses", createdAddress);
   }
 
+  [HideFromSwagger]
   [SwaggerOperation(Summary = "Generates new fake addresses")]
   [SwaggerResponse(201, "Addresses was created successfully", typeof(List<Address>))]
   [SwaggerResponse(500, "Unexpected error", typeof(ProblemDetails))]

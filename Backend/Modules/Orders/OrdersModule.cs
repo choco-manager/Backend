@@ -60,8 +60,8 @@ public class OrdersModule : IModule {
     module.MapGet("", GetOrders);
     module.MapGet("{id:guid}", GetOrdersDetails);
     module.MapPost("", CreateOrder);
-    module.MapPost("{id:guid}/delete", MarkOrderAsDeleted);
-    module.MapPost("{id:guid}/restore", MarkOrderAsNotDeleted);
+    module.MapPatch("{id:guid}/delete", MarkOrderAsDeleted);
+    module.MapPatch("{id:guid}/restore", MarkOrderAsNotDeleted);
     module.MapPut("{id:guid}", UpdateOrder);
 
     return endpoints;

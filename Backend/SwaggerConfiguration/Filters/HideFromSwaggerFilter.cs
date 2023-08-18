@@ -18,22 +18,27 @@
 // 
 
 
-#region
+using Backend.Attributes;
 
-using Backend.Validators;
+using Microsoft.OpenApi.Models;
 
-using FluentValidation;
-
-#endregion
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 
-namespace Backend.Modules.Clients.Contract;
+namespace Backend.SwaggerConfiguration.Filters;
 
-public class UpdateClientRequestBodyValidator : AbstractValidator<UpdateClientRequestBody> {
-  public UpdateClientRequestBodyValidator() {
-    RuleFor(b => b.FirstName).SetValidator(new BaseStringValidator());
-    RuleFor(b => b.LastName).SetValidator(new BaseOptionalStringValidator());
-    RuleFor(b => b.ChatLink).Must(link => Uri.TryCreate(link, UriKind.Absolute, out _));
-    RuleForEach(b => b.Addresses).SetValidator(new BaseGuidValidator());
+public class HideFromSwaggerFilter : IDocumentFilter {
+  public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context) {
+    foreach (var apiDescription in context.ApiDescriptions)
+    {
+      var succeeded = apiDescription.TryGetMethodInfo(out var methodInfo);
+      if (!succeeded || !methodInfo.GetCustomAttributes(typeof(HideFromSwaggerAttribute), false).Any())
+      {
+        continue;
+      }
+
+      var route = "/" + apiDescription.RelativePath?.TrimEnd('/');
+      swaggerDoc.Paths.Remove(route!);
+    }
   }
 }

@@ -22,6 +22,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var bld = WebApplication.CreateBuilder();
+bld.Host.UseSerilog();
 bld.Services
     .AddAuthenticationJwtBearer(s =>
     {
@@ -43,6 +44,7 @@ bld.Services
 
 var app = bld.Build();
 app
+    .UseSerilogRequestLogging()
     .UseAuthentication()
     .UseAuthorization()
     .UseFastEndpoints()

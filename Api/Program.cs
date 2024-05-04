@@ -1,3 +1,6 @@
+using System.Reflection;
+using Api.Configuration;
+using Api.Configuration.Swagger;
 using Api.Data;
 using FastEndpoints;
 using FastEndpoints.Security;
@@ -38,6 +41,24 @@ bld.Services
     .AddFastEndpoints()
     .SwaggerDocument(opts =>
     {
+        opts.AutoTagPathSegmentIndex = 0;
+        opts.MinEndpointVersion = 3;
+        opts.MaxEndpointVersion = 3;
+        opts.ShortSchemaNames = true;
+        opts.ShowDeprecatedOps = true;
+        opts.TagDescriptions = tags =>
+        {
+            var fields = typeof(SwaggerTags).GetFields(BindingFlags.Public | BindingFlags.Static);
+
+            foreach (var field in fields)
+            {
+                var descriptionAttribute = field.GetCustomAttribute<TagDescriptionAttribute>();
+                if (descriptionAttribute != null)
+                {
+                    tags.Add(field.GetValue(null)?.ToString()!, descriptionAttribute.Description);
+                }
+            }
+        };
         opts.DocumentSettings = s =>
         {
             s.Title = "ChocoManager Main API";

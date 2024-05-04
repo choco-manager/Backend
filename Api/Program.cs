@@ -1,15 +1,18 @@
 using FastEndpoints;
 using FastEndpoints.Security;
+using FastEndpoints.Swagger;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.OpenTelemetry;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.OpenTelemetry(opts => {
+    .WriteTo.OpenTelemetry(opts =>
+    {
         opts.Endpoint = "http://localhost:4317";
         opts.Protocol = OtlpProtocol.Grpc;
-        opts.ResourceAttributes = new Dictionary<string, object> {
+        opts.ResourceAttributes = new Dictionary<string, object>
+        {
             ["service.name"] = "ChocoManager Main API",
         };
     })
@@ -22,11 +25,20 @@ var bld = WebApplication.CreateBuilder();
 bld.Services
     .AddAuthenticationJwtBearer(s => { s.SigningKey = ""; })
     .AddAuthorization()
-    .AddFastEndpoints();
+    .AddFastEndpoints()
+    .SwaggerDocument(opts =>
+    {
+        opts.DocumentSettings = s =>
+        {
+            s.Title = "ChocoManager Main API";
+            s.Version = "v3";
+        };
+    });
 
 var app = bld.Build();
 app
     .UseAuthentication()
     .UseAuthorization()
-    .UseFastEndpoints();
+    .UseFastEndpoints()
+    .UseSwaggerGen();
 app.Run();

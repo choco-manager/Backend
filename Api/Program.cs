@@ -62,6 +62,8 @@ bld.Services
         opts.DocumentSettings = s =>
         {
             s.Title = "ChocoManager Main API";
+            s.Description = "Main API of ChocoManager project";
+            s.DocumentName = "main-v3";
             s.Version = "v3";
         };
     })
@@ -83,5 +85,5 @@ app
         opts.Versioning.PrependToRoute = true;
         opts.Endpoints.ShortNames = true;
     })
-    .UseSwaggerGen();
+    .UseSwaggerGen(opts => { opts.Path = "/swagger/{documentName}/swagger.json"; });
 app.Run();

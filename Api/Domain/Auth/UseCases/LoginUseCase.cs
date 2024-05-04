@@ -32,6 +32,24 @@ public class LoginUseCase(AppDbContext db, SecurityConfiguration configuration) 
             return Result<LoginResponse>.Unauthorized();
         }
 
+        var fcm = await db.FcmTokens.Where(e => e.UserId == user.Id).FirstOrDefaultAsync(ct);
+
+        if (fcm is null)
+        {
+            fcm = new FcmToken
+            {
+                Token = res.FcmToken,
+                UserId = user.Id
+            };
+            
+            await db.FcmTokens.AddAsync(fcm, ct);
+        }
+        else
+        {
+            fcm.Token = res.FcmToken;
+        }
+
+
         AuthUtils.CreateRefreshToken(configuration, user, out var refreshToken, out var refreshTokenSalt);
         AuthUtils.CreateAccessToken(configuration, user, out var accessToken);
 

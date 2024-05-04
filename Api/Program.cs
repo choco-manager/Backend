@@ -23,7 +23,13 @@ Log.Logger = new LoggerConfiguration()
 
 var bld = WebApplication.CreateBuilder();
 bld.Services
-    .AddAuthenticationJwtBearer(s => { s.SigningKey = ""; })
+    .AddAuthenticationJwtBearer(s =>
+    {
+        s.SigningKey = bld.Configuration
+            .GetRequiredSection("Security")
+            .GetRequiredSection("SigningKey")
+            .Value;
+    })
     .AddAuthorization()
     .AddFastEndpoints()
     .SwaggerDocument(opts =>

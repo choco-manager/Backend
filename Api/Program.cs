@@ -21,16 +21,16 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogEventLevel.Verbose)
     .CreateLogger();
 
-var bld = WebApplication.CreateBuilder();
-bld.Host.UseSerilog();
-bld
+var builder = WebApplication.CreateBuilder();
+builder.Host.UseSerilog();
+builder
     .ConfigureFastEndpoints()
     .ConfigureDatabase()
     .ConfigureSwaggerDocument()
     .MapConfiguration()
     .AddUseCases();
 
-var app = bld.Build();
+var app = builder.Build();
 app
     .UseSerilogRequestLogging()
     .UseAuthentication()

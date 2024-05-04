@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using Api.Common.Processors;
+using FastEndpoints;
 using FastEndpoints.Swagger;
 
 namespace Api.Extensions;
@@ -20,6 +21,11 @@ public static class ApplicationExtensions
             opts.Versioning.Prefix = "v";
             opts.Versioning.PrependToRoute = true;
             opts.Endpoints.ShortNames = true;
+            opts.Endpoints.Configurator = ep =>
+            {
+                ep.DontAutoSendResponse();
+                ep.PostProcessor<ConvertResultToStatusCode>(Order.Before);
+            };
         });
 
         return app;

@@ -13,6 +13,7 @@ public class LoginEndpoint(IUseCase<LoginRequest, LoginResponse> loginUseCase)
     {
         Post("auth/login");
         Version(3);
+        Description(e => e.Accepts<LoginRequest>());
         Options(x => x.WithTags(SwaggerTags.Auth));
         AllowAnonymous();
         DontThrowIfValidationFails();

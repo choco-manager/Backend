@@ -2,6 +2,7 @@ using System.Reflection;
 using Api.Configuration;
 using Api.Configuration.Swagger;
 using Api.Data;
+using Api.Extensions;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
@@ -67,6 +68,7 @@ bld.Services
             s.Version = "v3";
         };
     })
+    .AddUseCases()
     .AddDbContextPool<AppDbContext>(
         opts => opts.UseNpgsql(bld.Configuration.GetConnectionString("Default"))
     )

@@ -77,6 +77,11 @@ app
     .UseSerilogRequestLogging()
     .UseAuthentication()
     .UseAuthorization()
-    .UseFastEndpoints()
+    .UseFastEndpoints(opts =>
+    {
+        opts.Versioning.Prefix = "v";
+        opts.Versioning.PrependToRoute = true;
+        opts.Endpoints.ShortNames = true;
+    })
     .UseSwaggerGen();
 app.Run();

@@ -40,7 +40,7 @@ public class RegisterUseCase(AppDbContext db, SecurityConfiguration configuratio
             ExpireAt = DateTime.UtcNow.AddDays(14),
             Token = refreshToken,
             Salt = refreshTokenSalt,
-            User = user
+            UserId = user.Id
         };
 
         await db.Users.AddAsync(user, ct);

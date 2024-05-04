@@ -1,7 +1,7 @@
 ﻿using Api.Configuration.Swagger;
 using FastEndpoints;
 
-namespace Api.Domain.Internal.Endpoints;
+namespace Api.Domain.Internal.Endpoints.Ping;
 
 public class PingEndpoint : Endpoint<EmptyRequest, string>
 {

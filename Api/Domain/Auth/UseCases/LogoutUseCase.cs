@@ -10,11 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Domain.Auth.UseCases;
 
-public class LogoutUseCase(AppDbContext db): IUseCase<AuthorizedLogoutRequest, EmptyResponse>
+public class LogoutUseCase(AppDbContext db) : IUseCase<AuthorizedLogoutRequest, EmptyResponse>
 {
     public async Task<Result<EmptyResponse>> Execute(AuthorizedLogoutRequest res, CancellationToken ct)
     {
-        
         var login = res.User.ClaimValue(ClaimTypes.Name);
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(e => e.Login == login, ct);
 
@@ -32,13 +31,20 @@ public class LogoutUseCase(AppDbContext db): IUseCase<AuthorizedLogoutRequest, E
             db.RefreshTokens.Remove(rt);
         }
 
-        await db.RevokedAccessTokens.AddAsync(new RevokedAccessToken
+        var rat = await db.RevokedAccessTokens
+            .Where(e => e.Token == res.AccessToken)
+            .FirstOrDefaultAsync(ct);
+
+        if (rat is null)
         {
-            Token = res.AccessToken
-        }, ct);
+            await db.RevokedAccessTokens.AddAsync(new RevokedAccessToken
+            {
+                Token = res.AccessToken
+            }, ct);
+        }
 
         await db.SaveChangesAsync(ct);
-        
+
         return Result.Success();
     }
 }

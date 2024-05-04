@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Ardalis.Result;
 using FastEndpoints;
+using Serilog;
 
 namespace Api.Common.Processors;
 
@@ -13,6 +14,8 @@ public class HandleExceptionsPostProcessor : IGlobalPostProcessor
             var exception = context.ExceptionDispatchInfo!.SourceException;
 
             var result = Result.Error($"{exception.GetType().Name}: {exception.Message}");
+            
+            Log.Error(exception, "Exception occured:");
             
             context.MarkExceptionAsHandled();
 

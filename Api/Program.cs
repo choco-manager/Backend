@@ -3,6 +3,7 @@ using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.OpenTelemetry;
@@ -45,7 +46,10 @@ bld.Services
     })
     .AddDbContextPool<AppDbContext>(
         opts => opts.UseNpgsql(bld.Configuration.GetConnectionString("Default"))
-    );
+    )
+    .Configure<SecurityConfiguration>(bld.Configuration.GetRequiredSection("Security"))
+    .AddSingleton(resolver =>
+        resolver.GetRequiredService<IOptions<SecurityConfiguration>>().Value);
 
 var app = bld.Build();
 app

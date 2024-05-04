@@ -1,6 +1,8 @@
+using Api.Data;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.OpenTelemetry;
@@ -40,7 +42,10 @@ bld.Services
             s.Title = "ChocoManager Main API";
             s.Version = "v3";
         };
-    });
+    })
+    .AddDbContextPool<AppDbContext>(
+        opts => opts.UseNpgsql(bld.Configuration.GetConnectionString("Default"))
+    );
 
 var app = bld.Build();
 app

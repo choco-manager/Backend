@@ -1,8 +1,15 @@
 using FastEndpoints;
+using FastEndpoints.Security;
 
 var bld = WebApplication.CreateBuilder();
-bld.Services.AddFastEndpoints();
+bld.Services
+    .AddAuthenticationJwtBearer(s => { s.SigningKey = ""; })
+    .AddAuthorization()
+    .AddFastEndpoints();
 
 var app = bld.Build();
-app.UseFastEndpoints();
+app
+    .UseAuthentication()
+    .UseAuthorization()
+    .UseFastEndpoints();
 app.Run();

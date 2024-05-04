@@ -22,6 +22,7 @@ app
     .ConfigureAuthorization()
     .ConfigureFastEndpoints()
     .ConfigureSwaggerGen()
+    .MigrateDatabase()
     .UseSerilogRequestLogging();
 
 app.Run();

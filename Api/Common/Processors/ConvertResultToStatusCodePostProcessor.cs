@@ -4,7 +4,7 @@ using IResult = Ardalis.Result.IResult;
 
 namespace Api.Common.Processors;
 
-public class ConvertResultToStatusCode : IGlobalPostProcessor
+public class ConvertResultToStatusCodePostProcessor : IGlobalPostProcessor
 {
     public async Task PostProcessAsync(IPostProcessorContext context, CancellationToken ct)
     {

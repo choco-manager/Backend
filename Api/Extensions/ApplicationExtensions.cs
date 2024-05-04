@@ -24,7 +24,7 @@ public static class ApplicationExtensions
             opts.Endpoints.Configurator = ep =>
             {
                 ep.DontAutoSendResponse();
-                ep.PostProcessor<ConvertResultToStatusCode>(Order.Before);
+                ep.PostProcessor<ConvertResultToStatusCodePostProcessor>(Order.Before);
             };
         });
 

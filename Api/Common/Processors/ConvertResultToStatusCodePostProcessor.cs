@@ -8,7 +8,7 @@ public class ConvertResultToStatusCodePostProcessor : IGlobalPostProcessor
 {
     public async Task PostProcessAsync(IPostProcessorContext context, CancellationToken ct)
     {
-        if (!context.HttpContext.ResponseStarted())
+        if (!context.HttpContext.ResponseStarted() && !context.HasExceptionOccurred)
         {
             var result = (IResult)context.Response!;
             await context.HttpContext.Response.SendAsync(result, GetResultCode(result.Status), cancellation: ct);

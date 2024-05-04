@@ -48,13 +48,25 @@ public static class BuilderExtensions
 
     public static WebApplicationBuilder AddUseCases(this WebApplicationBuilder builder)
     {
-        var types = Assembly.GetCallingAssembly().GetTypes()
-            .Where(t => t.GetInterfaces()
-                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUseCase<,>)));
 
-        foreach (var type in types)
+        var types = AppDomain.CurrentDomain
+            .GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes());
+
+        var registrations = types.Where(type => !type.IsAbstract)
+            .Where(type => !type.IsGenericTypeDefinition)
+            .Select(type => new
+            {
+                type,
+                services = type.GetInterfaces()
+                    .Where(iface => iface.IsGenericType)
+                    .Where(iface => iface.GetGenericTypeDefinition() == typeof(IUseCase<,>))
+            })
+            .SelectMany(t => t.services, (t, service) => new { service, t.type });
+
+        foreach (var reg in registrations)
         {
-            builder.Services.AddTransient(typeof(IUseCase<,>), type);
+            builder.Services.AddTransient(reg.service, reg.type);
         }
 
         return builder;

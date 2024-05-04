@@ -1,9 +1,10 @@
 ﻿using Api.Configuration.Swagger;
+using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Internal.Endpoints.Ping;
 
-public class PingEndpoint : Endpoint<EmptyRequest, string>
+public class PingEndpoint : Endpoint<EmptyRequest, Result<string>>
 {
     public override void Configure()
     {
@@ -13,8 +14,8 @@ public class PingEndpoint : Endpoint<EmptyRequest, string>
         AllowAnonymous();
     }
 
-    public override async Task<string> ExecuteAsync(EmptyRequest req, CancellationToken ct)
+    public override async Task<Result<string>> ExecuteAsync(EmptyRequest req, CancellationToken ct)
     {
-        return "pong";
+        return Result.Success("pong");
     }
 }

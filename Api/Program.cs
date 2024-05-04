@@ -1,6 +1,4 @@
 using Api.Extensions;
-using FastEndpoints;
-using FastEndpoints.Swagger;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()

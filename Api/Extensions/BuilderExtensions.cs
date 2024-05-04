@@ -6,6 +6,7 @@ using Api.Data;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -21,6 +22,20 @@ public static class BuilderExtensions
                     .GetRequiredSection("Security")
                     .GetRequiredSection("SigningKey")
                     .Value;
+            }, options =>
+            {
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async ctx =>
+                    {
+                        var token = ctx.Request.Headers.Authorization.FirstOrDefault()?.Replace("Bearer ", "");
+
+                        if (false) // TODO: write some stuff to check if token was not revoked
+                        {
+                            ctx.Fail("Token Revoked!");
+                        }
+                    }
+                };
             })
             .AddAuthorization()
             .AddFastEndpoints();
@@ -48,7 +63,6 @@ public static class BuilderExtensions
 
     public static WebApplicationBuilder AddUseCases(this WebApplicationBuilder builder)
     {
-
         var types = AppDomain.CurrentDomain
             .GetAssemblies()
             .SelectMany(assembly => assembly.GetTypes());

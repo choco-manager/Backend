@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Api.Configuration;
 using Api.Data.Models;
+using Api.Domain.Auth.Data;
 using FastEndpoints.Security;
 
 namespace Api.Domain.Auth.Utils;
@@ -37,5 +38,17 @@ public class AuthUtils
         var hashBytes = hmac.ComputeHash(inputDataBytes);
         refreshToken = Convert.ToBase64String(hashBytes);
         salt = hmac.Key;
+    }
+
+    public static bool IsValidPassword(User user, LoginRequest req)
+    {
+        return VerifyPasswordHash(req.Password, user.PasswordHash, user.PasswordSalt);
+    }
+
+    private static bool VerifyPasswordHash(string plainPassword, byte[] passwordHash, byte[] passwordSalt)
+    {
+        using var hmac = new HMACSHA512(passwordSalt);
+        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(plainPassword));
+        return computedHash.SequenceEqual(passwordHash);
     }
 }

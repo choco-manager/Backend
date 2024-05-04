@@ -74,7 +74,9 @@ public static class BuilderExtensions
                 type,
                 services = type.GetInterfaces()
                     .Where(iface => iface.IsGenericType)
-                    .Where(iface => iface.GetGenericTypeDefinition() == typeof(IUseCase<,>))
+                    .Where(iface =>
+                        iface.GetGenericTypeDefinition() == typeof(IUseCase<,>) ||
+                        iface.GetGenericTypeDefinition() == typeof(IPagedUseCase<,>))
             })
             .SelectMany(t => t.services, (t, service) => new { service, t.type });
 

@@ -45,14 +45,6 @@ public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductReque
         await db.Products.AddAsync(product, ct);
         await db.SaveChangesAsync(ct);
 
-        return Result.Success(new ProductDto
-        {
-            Title = res.Title,
-            CostPrice = res.CostPrice,
-            RetailPrice = res.RetailPrice,
-            StockBalance = res.StockBalance,
-            IsBulk = res.IsBulk,
-            Tags = tags.Select(e => e.Title).ToList()
-        });
+        return Result.Success(ProductMapper.ProductToDto(product));
     }
 }

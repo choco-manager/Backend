@@ -15,15 +15,7 @@ public class GetAllProductsUseCase(AppDbContext db) : IPagedUseCase<PagedRequest
         var products = await db.Products
             .Skip(skip)
             .Take(res.PageSize)
-            .Select(e => new ProductDto
-            {
-                Title = e.Title,
-                CostPrice = e.CostPrice,
-                RetailPrice = e.RetailPrice,
-                StockBalance = e.StockBalance,
-                IsBulk = e.IsBulk,
-                Tags = e.Tags.Select(t => t.Title).ToList()
-            })
+            .Select(e => ProductMapper.ProductToDto(e))
             .ToListAsync(ct);
 
         var totalRecords = await db.Products.CountAsync(ct);

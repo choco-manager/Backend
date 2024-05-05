@@ -1,4 +1,5 @@
-﻿using Api.Common;
+﻿using System.Net.Mime;
+using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Auth.Data;
 using Ardalis.Result;
@@ -13,8 +14,11 @@ public class LoginEndpoint(IUseCase<LoginRequest, LoginResponse> loginUseCase)
     {
         Post("auth/login");
         Version(3);
-        Description(e => e.Accepts<LoginRequest>());
-        Options(x => x.WithTags(SwaggerTags.Auth));
+        Options(x =>
+        {
+            x.WithTags(SwaggerTags.Auth);
+            x.Accepts<LoginRequest>(MediaTypeNames.Application.Json);
+        });
         AllowAnonymous();
         DontThrowIfValidationFails();
     }

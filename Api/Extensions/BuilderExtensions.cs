@@ -29,8 +29,9 @@ public static class BuilderExtensions
                     OnTokenValidated = async ctx =>
                     {
                         var token = ctx.Request.Headers.Authorization.FirstOrDefault()?.Replace("Bearer ", "");
+                        var useCase = ctx.HttpContext.Resolve<IUseCase<string?, bool>>();
 
-                        if (false) // TODO: write some stuff to check if token was not revoked
+                        if ((await useCase.Execute(token)).Value)
                         {
                             ctx.Fail("Token Revoked!");
                         }

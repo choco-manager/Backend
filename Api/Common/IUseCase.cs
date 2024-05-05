@@ -4,5 +4,5 @@ namespace Api.Common;
 
 public interface IUseCase<in TData, TResult>
 {
-    public Task<Result<TResult>> Execute(TData res, CancellationToken ct);
+    public Task<Result<TResult>> Execute(TData res, CancellationToken ct = default);
 }

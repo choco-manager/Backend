@@ -39,7 +39,8 @@ public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductReque
             RetailPrice = res.RetailPrice,
             StockBalance = res.StockBalance,
             IsBulk = res.IsBulk,
-            Tags = tags
+            Tags = tags,
+            IsDeleted = false
         };
 
         await db.Products.AddAsync(product, ct);

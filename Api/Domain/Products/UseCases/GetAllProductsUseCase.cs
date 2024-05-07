@@ -8,22 +8,22 @@ namespace Api.Domain.Products.UseCases;
 
 public class GetAllProductsUseCase(AppDbContext db) : IPagedUseCase<PagedRequest, List<ProductDto>>
 {
-    public async Task<PagedResult<List<ProductDto>>> Execute(PagedRequest res, CancellationToken ct)
+    public async Task<PagedResult<List<ProductDto>>> Execute(PagedRequest req, CancellationToken ct)
     {
-        var skip = (res.Page - 1) * res.PageSize;
+        var skip = (req.Page - 1) * req.PageSize;
 
         var products = await db.Products
             .Skip(skip)
-            .Take(res.PageSize)
+            .Take(req.PageSize)
             .Select(e => ProductMapper.ProductToDto(e))
             .ToListAsync(ct);
 
         var totalRecords = await db.Products.CountAsync(ct);
-        var totalPages = (int)Math.Ceiling((double)totalRecords / res.PageSize);
+        var totalPages = (int)Math.Ceiling((double)totalRecords / req.PageSize);
 
         return Result<List<ProductDto>>.Success(products).ToPagedResult(new PagedInfo(
-            res.Page,
-            res.PageSize,
+            req.Page,
+            req.PageSize,
             totalPages, totalRecords));
     }
 }

@@ -11,7 +11,7 @@ namespace Api.Domain.Products.UseCases;
 
 public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductRequest, ProductDto>
 {
-    public async Task<Result<ProductDto>> Execute(CreateProductRequest res, CancellationToken ct)
+    public async Task<Result<ProductDto>> Execute(CreateProductRequest req, CancellationToken ct)
     {
         var ctx = ValidationContext<CreateProductRequest>.Instance;
 
@@ -22,7 +22,7 @@ public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductReque
 
         List<ProductTag> tags = [];
 
-        foreach (var tagId in res.Tags)
+        foreach (var tagId in req.Tags)
         {
             var tag = await db.ProductTags.Where(e => e.Id == tagId).FirstOrDefaultAsync(ct);
 
@@ -34,11 +34,11 @@ public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductReque
 
         var product = new Product
         {
-            Title = res.Title,
-            CostPrice = res.CostPrice,
-            RetailPrice = res.RetailPrice,
-            StockBalance = res.StockBalance,
-            IsBulk = res.IsBulk,
+            Title = req.Title,
+            CostPrice = req.CostPrice,
+            RetailPrice = req.RetailPrice,
+            StockBalance = req.StockBalance,
+            IsBulk = req.IsBulk,
             Tags = tags,
             IsDeleted = false
         };

@@ -12,9 +12,9 @@ namespace Api.Domain.Auth.UseCases;
 
 public class LogoutUseCase(AppDbContext db) : IUseCase<AuthorizedLogoutRequest, EmptyResponse>
 {
-    public async Task<Result<EmptyResponse>> Execute(AuthorizedLogoutRequest res, CancellationToken ct)
+    public async Task<Result<EmptyResponse>> Execute(AuthorizedLogoutRequest req, CancellationToken ct)
     {
-        var login = res.User.ClaimValue(ClaimTypes.Name);
+        var login = req.User.ClaimValue(ClaimTypes.Name);
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(e => e.Login == login, ct);
 
         if (user is null)
@@ -32,14 +32,14 @@ public class LogoutUseCase(AppDbContext db) : IUseCase<AuthorizedLogoutRequest, 
         }
 
         var rat = await db.RevokedAccessTokens
-            .Where(e => e.Token == res.AccessToken)
+            .Where(e => e.Token == req.AccessToken)
             .FirstOrDefaultAsync(ct);
 
         if (rat is null)
         {
             await db.RevokedAccessTokens.AddAsync(new RevokedAccessToken
             {
-                Token = res.AccessToken
+                Token = req.AccessToken
             }, ct);
         }
 

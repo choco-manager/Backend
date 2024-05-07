@@ -8,10 +8,10 @@ namespace Api.Domain.Products.UseCases;
 
 public class GetProductUseCase(AppDbContext db) : IUseCase<IdModel, ProductDto>
 {
-    public async Task<Result<ProductDto>> Execute(IdModel res, CancellationToken ct = default)
+    public async Task<Result<ProductDto>> Execute(IdModel req, CancellationToken ct = default)
     {
         var product = await db.Products
-            .Where(e => e.Id == res.Id)
+            .Where(e => e.Id == req.Id)
             .Include(e => e.Tags)
             .FirstOrDefaultAsync(ct);
 

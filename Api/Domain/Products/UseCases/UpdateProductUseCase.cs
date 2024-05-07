@@ -11,7 +11,7 @@ namespace Api.Domain.Products.UseCases;
 
 public class UpdateProductUseCase(AppDbContext db) : IUseCase<UpdateProductRequest, ProductDto>
 {
-    public async Task<Result<ProductDto>> Execute(UpdateProductRequest res, CancellationToken ct = default)
+    public async Task<Result<ProductDto>> Execute(UpdateProductRequest req, CancellationToken ct = default)
     {
         var ctx = ValidationContext<UpdateProductRequest>.Instance;
 
@@ -20,7 +20,7 @@ public class UpdateProductUseCase(AppDbContext db) : IUseCase<UpdateProductReque
             return Result.Invalid(ctx.ValidationFailures.AsErrors());
         }
 
-        var product = await db.Products.Where(e => e.Id == res.Id).FirstOrDefaultAsync(ct);
+        var product = await db.Products.Where(e => e.Id == req.Id).FirstOrDefaultAsync(ct);
 
         if (product is null)
         {
@@ -29,9 +29,9 @@ public class UpdateProductUseCase(AppDbContext db) : IUseCase<UpdateProductReque
 
         List<ProductTag> tags = [];
 
-        if (res.Tags is not null)
+        if (req.Tags is not null)
         {
-            foreach (var tagId in res.Tags)
+            foreach (var tagId in req.Tags)
             {
                 var tag = await db.ProductTags.Where(e => e.Id == tagId).FirstOrDefaultAsync(ct);
 
@@ -42,30 +42,30 @@ public class UpdateProductUseCase(AppDbContext db) : IUseCase<UpdateProductReque
             }
         }
 
-        if (res.Title is not null)
+        if (req.Title is not null)
         {
-            product.Title = res.Title;
+            product.Title = req.Title;
         }
 
-        if (res.CostPrice is not null)
+        if (req.CostPrice is not null)
         {
-            product.CostPrice = res.CostPrice.Value;
+            product.CostPrice = req.CostPrice.Value;
         }
 
-        if (res.RetailPrice is not null)
+        if (req.RetailPrice is not null)
         {
-            product.RetailPrice = res.RetailPrice.Value;
+            product.RetailPrice = req.RetailPrice.Value;
         }
 
-        if (res.Tags is not null)
+        if (req.Tags is not null)
         {
             product.Tags = tags;
         }
 
 
-        if (res.IsBulk is not null)
+        if (req.IsBulk is not null)
         {
-            product.IsBulk = res.IsBulk.Value;
+            product.IsBulk = req.IsBulk.Value;
         }
 
         await db.SaveChangesAsync(ct);

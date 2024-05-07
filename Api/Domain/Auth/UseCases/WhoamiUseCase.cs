@@ -11,9 +11,9 @@ namespace Api.Domain.Auth.UseCases;
 public class WhoamiUseCase(AppDbContext db)
     : IUseCase<AuthorizedEmptyRequest, WhoamiResponse>
 {
-    public async Task<Result<WhoamiResponse>> Execute(AuthorizedEmptyRequest res, CancellationToken ct)
+    public async Task<Result<WhoamiResponse>> Execute(AuthorizedEmptyRequest req, CancellationToken ct)
     {
-        var login = res.User.ClaimValue(ClaimTypes.Name);
+        var login = req.User.ClaimValue(ClaimTypes.Name);
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(e => e.Login == login, ct);
 
         if (user is null)

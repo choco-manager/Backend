@@ -13,7 +13,7 @@ namespace Api.Domain.Auth.UseCases;
 
 public class LoginUseCase(AppDbContext db, SecurityConfiguration configuration) : IUseCase<LoginRequest, LoginResponse>
 {
-    public async Task<Result<LoginResponse>> Execute(LoginRequest res, CancellationToken ct)
+    public async Task<Result<LoginResponse>> Execute(LoginRequest req, CancellationToken ct)
     {
         var ctx = ValidationContext<RegisterRequest>.Instance;
 
@@ -24,10 +24,10 @@ public class LoginUseCase(AppDbContext db, SecurityConfiguration configuration) 
 
         var user = await db.Users
             .AsNoTracking()
-            .Where(e => e.Login == res.Login)
+            .Where(e => e.Login == req.Login)
             .FirstOrDefaultAsync(ct);
 
-        if (user is null || !AuthUtils.IsValidPassword(user, res))
+        if (user is null || !AuthUtils.IsValidPassword(user, req))
         {
             return Result<LoginResponse>.Unauthorized();
         }
@@ -38,7 +38,7 @@ public class LoginUseCase(AppDbContext db, SecurityConfiguration configuration) 
         {
             fcm = new FcmToken
             {
-                Token = res.FcmToken,
+                Token = req.FcmToken,
                 UserId = user.Id
             };
             
@@ -46,7 +46,7 @@ public class LoginUseCase(AppDbContext db, SecurityConfiguration configuration) 
         }
         else
         {
-            fcm.Token = res.FcmToken;
+            fcm.Token = req.FcmToken;
         }
 
 

@@ -11,10 +11,10 @@ namespace Api.Domain.Auth.UseCases;
 public class RefreshUseCase(AppDbContext db, SecurityConfiguration configuration)
     : IUseCase<RefreshRequest, LoginResponse>
 {
-    public async Task<Result<LoginResponse>> Execute(RefreshRequest res, CancellationToken ct)
+    public async Task<Result<LoginResponse>> Execute(RefreshRequest req, CancellationToken ct)
     {
         var rt = await db.RefreshTokens
-            .Where(e => e.Token == res.RefreshToken && e.ExpireAt <= DateTime.UtcNow)
+            .Where(e => e.Token == req.RefreshToken && e.ExpireAt <= DateTime.UtcNow)
             .FirstOrDefaultAsync(ct);
 
         if (rt is null)

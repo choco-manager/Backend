@@ -6,6 +6,6 @@ public class RestoreProductEndpointSummary: Summary<RestoreProductEndpoint>
 {
     public RestoreProductEndpointSummary()
     {
-        Summary = "Восстанавливает удалённый товар";
+        Summary = "Restores deleted product";
     }
 }

@@ -6,6 +6,6 @@ public class SoftDeleteProductEndpointSummary: Summary<SoftDeleteProductEndpoint
 {
     public SoftDeleteProductEndpointSummary()
     {
-        Summary = "Помечает товар удалённым, не удаляя его насовсем";
+        Summary = "Marks product as deleted, without real deleting";
     }
 }

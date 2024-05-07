@@ -1,12 +1,13 @@
 ﻿using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Products.Data;
+using Api.Domain.Products.UseCases;
 using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Products.Endpoints.Update;
 
-public class UpdateProductEndpoint(IUseCase<UpdateProductRequest, ProductDto> updateProductUseCase): Endpoint<UpdateProductRequest, Result<ProductDto>>
+public class UpdateProductEndpoint(UpdateProductUseCase updateProductUseCase): Endpoint<UpdateProductRequest, Result<ProductDto>>
 {
     public override async Task<Result<ProductDto>> ExecuteAsync(UpdateProductRequest req, CancellationToken ct)
     {

@@ -1,12 +1,13 @@
 ﻿using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Products.Data;
+using Api.Domain.Products.UseCases;
 using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Products.Endpoints.Create;
 
-public class CreateProductEndpoint(IUseCase<CreateProductRequest, ProductDto> createProductUseCase)
+public class CreateProductEndpoint(CreateProductUseCase createProductUseCase)
     : Endpoint<CreateProductRequest, Result<ProductDto>>
 {
     public override void Configure()

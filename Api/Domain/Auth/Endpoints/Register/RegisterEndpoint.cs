@@ -1,12 +1,13 @@
 ﻿using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Auth.Data;
+using Api.Domain.Auth.UseCases;
 using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Auth.Endpoints.Register;
 
-public class RegisterEndpoint(IUseCase<RegisterRequest, RegisterResponse> registerUseCase)
+public class RegisterEndpoint(RegisterUseCase registerUseCase)
     : Endpoint<RegisterRequest, Result<RegisterResponse>>
 {
     public override void Configure()

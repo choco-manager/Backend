@@ -1,12 +1,13 @@
 ﻿using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Auth.Data;
+using Api.Domain.Auth.UseCases;
 using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Auth.Endpoints.Logout;
 
-public class LogoutEndpoint(IUseCase<AuthorizedLogoutRequest, EmptyResponse> logoutUseCase)
+public class LogoutEndpoint(LogoutUseCase logoutUseCase)
     : Endpoint<LogoutRequest, Result<EmptyResponse>>
 {
     public override void Configure()

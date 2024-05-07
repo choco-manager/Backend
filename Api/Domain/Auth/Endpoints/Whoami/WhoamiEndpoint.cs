@@ -1,12 +1,13 @@
 ﻿using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Auth.Data;
+using Api.Domain.Auth.UseCases;
 using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Auth.Endpoints.Whoami;
 
-public class WhoamiEndpoint(IUseCase<AuthorizedEmptyRequest, WhoamiResponse> whoamiUseCase)
+public class WhoamiEndpoint(WhoamiUseCase whoamiUseCase)
     : Endpoint<EmptyRequest, Result<WhoamiResponse>>
 {
     public override void Configure()

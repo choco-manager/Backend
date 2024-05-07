@@ -1,12 +1,13 @@
 ﻿using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Products.Data;
+using Api.Domain.Products.UseCases;
 using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Products.Endpoints.Get;
 
-public class GetProductEndpoint(IUseCase<IdModel, ProductDto> getProduct): Endpoint<IdModel, Result<ProductDto>>
+public class GetProductEndpoint(GetProductUseCase getProduct): Endpoint<IdModel, Result<ProductDto>>
 {
     public override void Configure()
     {

@@ -83,7 +83,7 @@ public static class BuilderExtensions
 
         foreach (var reg in registrations)
         {
-            builder.Services.AddTransient(reg.service, reg.type);
+            builder.Services.AddTransient(reg.type);
         }
 
         return builder;

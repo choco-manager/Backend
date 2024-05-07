@@ -2,12 +2,13 @@
 using Api.Common;
 using Api.Configuration.Swagger;
 using Api.Domain.Auth.Data;
+using Api.Domain.Auth.UseCases;
 using Ardalis.Result;
 using FastEndpoints;
 
 namespace Api.Domain.Auth.Endpoints.Login;
 
-public class LoginEndpoint(IUseCase<LoginRequest, LoginResponse> loginUseCase)
+public class LoginEndpoint(LoginUseCase loginUseCase)
     : Endpoint<LoginRequest, Result<LoginResponse>>
 {
     public override void Configure()

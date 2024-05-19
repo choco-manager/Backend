@@ -40,6 +40,18 @@ public class AuthUtils
         salt = hmac.Key;
     }
 
+    public static void CreateRestorationToken(SecurityConfiguration configuration, string login,
+        out string restorationToken, out byte[] salt)
+    {
+        using var hmac = new HMACSHA256();
+        var inputData = $"{login}:{hmac.Key}:{configuration.RestorationTokenSecret}";
+        var inputDataBytes = Encoding.UTF8.GetBytes(inputData);
+
+        var hashBytes = hmac.ComputeHash(inputDataBytes);
+        restorationToken = Convert.ToBase64String(hashBytes);
+        salt = hmac.Key;
+    }
+
     public static bool IsValidPassword(User user, LoginRequest req)
     {
         return VerifyPasswordHash(req.Password, user.PasswordHash, user.PasswordSalt);

@@ -8,4 +8,5 @@ public class RestorationToken : BaseModel
     public required byte[] Salt { get; set; }
     public bool IsValid { get; set; }
     public DateTime ValidUntil { get; set; }
+    public required string Login { get; set; }
 }

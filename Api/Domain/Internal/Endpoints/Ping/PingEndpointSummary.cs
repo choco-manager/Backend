@@ -6,6 +6,6 @@ public class PingEndpointSummary : Summary<PingEndpoint>
 {
     public PingEndpointSummary()
     {
-        Summary = """Unconditionally returns "ping" string""";
+        Summary = """Unconditionally returns "pong" string""";
     }
 }

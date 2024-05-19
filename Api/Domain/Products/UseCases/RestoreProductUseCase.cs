@@ -21,7 +21,7 @@ public class RestoreProductUseCase(AppDbContext db): IUseCase<IdModel, ProductDt
 
         await db.SaveChangesAsync(ct);
         
-        return Result.Success(ProductMapper.ProductToDto(product));
+        return Result.NoContent();
 
     }
 }

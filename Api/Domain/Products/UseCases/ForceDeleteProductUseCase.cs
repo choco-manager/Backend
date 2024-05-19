@@ -21,7 +21,7 @@ public class ForceDeleteProductUseCase(AppDbContext db): IUseCase<IdModel, Produ
 
         await db.SaveChangesAsync(ct);
         
-        return Result.Success(ProductMapper.ProductToDto(product));
+        return Result.NoContent();
 
     }
 }

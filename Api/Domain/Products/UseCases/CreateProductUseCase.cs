@@ -46,6 +46,6 @@ public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductReque
         await db.Products.AddAsync(product, ct);
         await db.SaveChangesAsync(ct);
 
-        return Result.Success(ProductMapper.ProductToDto(product));
+        return Result<ProductDto>.Created(ProductMapper.ProductToDto(product), "/products");
     }
 }

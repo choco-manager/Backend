@@ -21,7 +21,7 @@ public class SoftDeleteProductUseCase(AppDbContext db): IUseCase<IdModel, Produc
 
         await db.SaveChangesAsync(ct);
         
-        return Result.Success(ProductMapper.ProductToDto(product));
+        return Result.NoContent();
 
     }
 }

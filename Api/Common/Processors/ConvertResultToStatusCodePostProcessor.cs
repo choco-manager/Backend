@@ -20,6 +20,8 @@ public class ConvertResultToStatusCodePostProcessor : IGlobalPostProcessor
         return status switch
         {
             ResultStatus.Ok => 200,
+            ResultStatus.Created => 201,
+            ResultStatus.NoContent => 204,
             ResultStatus.Error => 500,
             ResultStatus.Forbidden => 403,
             ResultStatus.Unauthorized => 401,

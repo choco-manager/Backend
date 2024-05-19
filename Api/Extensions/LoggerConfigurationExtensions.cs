@@ -24,6 +24,7 @@ public static class LoggerConfigurationExtensions
             )
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .MinimumLevel.Override("Default", LogEventLevel.Debug)
+            .MinimumLevel.Override("Npgsql", LogEventLevel.Warning)
             .MinimumLevel
             .Override("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogEventLevel.Verbose);
 

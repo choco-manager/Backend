@@ -14,7 +14,7 @@ public class RefreshUseCase(AppDbContext db, SecurityConfiguration configuration
     public async Task<Result<LoginResponse>> Execute(RefreshRequest req, CancellationToken ct)
     {
         var rt = await db.RefreshTokens
-            .Where(e => e.Token == req.RefreshToken && e.ExpireAt <= DateTime.UtcNow)
+            .Where(e => e.Token == req.RefreshToken && e.ExpireAt >= DateTime.UtcNow)
             .FirstOrDefaultAsync(ct);
 
         if (rt is null)

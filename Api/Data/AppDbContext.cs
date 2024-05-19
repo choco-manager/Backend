@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public virtual DbSet<RevokedAccessToken> RevokedAccessTokens => Set<RevokedAccessToken>();
     public virtual DbSet<FcmToken> FcmTokens => Set<FcmToken>();
+    public virtual DbSet<RestorationToken> RestorationTokens => Set<RestorationToken>();
     public virtual DbSet<Product> Products => Set<Product>();
     public virtual DbSet<ProductTag> ProductTags => Set<ProductTag>();
 
@@ -61,7 +62,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 Id = Guid.Parse("6010b624-5e50-4c74-aedd-62d86968b8aa"),
                 Title = "С орехами"
             },
-            
         ]);
     }
 }

@@ -13,6 +13,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<Product> Products => Set<Product>();
     public virtual DbSet<ProductTag> ProductTags => Set<ProductTag>();
     public virtual DbSet<PriceHistory> PriceHistory => Set<PriceHistory>();
+    public virtual DbSet<OrderedProduct> OrderedProducts => Set<OrderedProduct>();
+    public virtual DbSet<Order> Orders => Set<Order>();
+    public virtual DbSet<Address> Addresses => Set<Address>();
+    public virtual DbSet<City> Cities => Set<City>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,5 +68,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 Title = "С орехами"
             },
         ]);
+
+        modelBuilder.Entity<City>().HasData([
+            new City
+            {
+                Id = Guid.Parse("2a872129-328e-4e39-9d06-16cb9bafe6fa"),
+                Name = "Фурманов"
+            },
+            new City
+            {
+                Id = Guid.Parse("8ca6ebf2-bda0-4e56-9e2c-6dd77153433e"),
+                Name = "Приволжск"
+            },
+            new City
+            {
+                Id = Guid.Parse("85ae3b9a-39d7-4654-a266-2c65000cf8f1"),
+                Name = "Иваново"
+            },
+            new City
+            {
+                Id = Guid.Parse("06787c55-517b-4d26-9e54-5ae0755b65c2"),
+                Name = "Владимир"
+            },
+        ]);
+
+        modelBuilder.Entity<OrderedProduct>().HasKey(e => new { e.OrderId, e.ProductId });
     }
 }

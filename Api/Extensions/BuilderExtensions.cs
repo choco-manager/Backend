@@ -3,6 +3,7 @@ using Api.Common;
 using Api.Configuration;
 using Api.Configuration.Swagger;
 using Api.Data;
+using Api.Domain.Auth.UseCases;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
@@ -29,7 +30,7 @@ public static class BuilderExtensions
                     OnTokenValidated = async ctx =>
                     {
                         var token = ctx.Request.Headers.Authorization.FirstOrDefault()?.Replace("Bearer ", "");
-                        var useCase = ctx.HttpContext.Resolve<IUseCase<string?, bool>>();
+                        var useCase = ctx.HttpContext.Resolve<ValidateTokenUseCase>();
 
                         if ((await useCase.Execute(token)).Value)
                         {

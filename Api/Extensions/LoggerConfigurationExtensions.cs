@@ -3,7 +3,6 @@ using Serilog.Events;
 using Serilog.Exceptions;
 using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
-using Serilog.Sinks.OpenTelemetry;
 using Serilog.Templates.Themes;
 using SerilogTracing.Expressions;
 

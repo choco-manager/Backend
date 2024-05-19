@@ -1,28 +1,46 @@
 using Api.Extensions;
 using Serilog;
+using SerilogTracing;
 
 Log.Logger = new LoggerConfiguration()
     .Configure()
     .CreateLogger();
 
-var builder = WebApplication.CreateBuilder();
+using var listener = new ActivityListenerConfiguration()
+    .Instrument.AspNetCoreRequests()
+    .TraceToSharedLogger();
 
-builder.Host.UseSerilog();
+try
+{
+    var builder = WebApplication.CreateBuilder();
 
-builder
-    .ConfigureFastEndpoints()
-    .ConfigureDatabase()
-    .ConfigureSwaggerDocument()
-    .MapConfiguration()
-    .AddUseCases();
+    builder.Host.UseSerilog();
 
-var app = builder.Build();
+    builder
+        .ConfigureFastEndpoints()
+        .ConfigureDatabase()
+        .ConfigureSwaggerDocument()
+        .MapConfiguration()
+        .AddUseCases();
 
-app
-    .ConfigureAuthorization()
-    .ConfigureFastEndpoints()
-    .ConfigureSwaggerGen()
-    .MigrateDatabase()
-    .UseSerilogRequestLogging();
+    var app = builder.Build();
 
-app.Run();
+    app
+        .ConfigureAuthorization()
+        .ConfigureFastEndpoints()
+        .ConfigureSwaggerGen()
+        .MigrateDatabase()
+        .UseSerilogRequestLogging();
+
+    app.Run();
+    return 0;
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Unhandled exception");
+    return 1;
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}

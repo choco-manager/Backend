@@ -13,14 +13,15 @@ public class GetProductUseCase(AppDbContext db) : IUseCase<IdModel, ProductDto>
         var product = await db.Products
             .Where(e => e.Id == req.Id)
             .Include(e => e.Tags)
+            .Include(e => e.Prices)
             .FirstOrDefaultAsync(ct);
 
         if (product is null)
         {
             return Result.NotFound(nameof(product));
         }
-        
-        return Result.Success(ProductMapper.ProductToDto(product));
-        
+
+        return Result.Success(ProductMapper.ProductToDto(product,
+            product.Prices.OrderByDescending(e => e.EffectiveTimestamp).ToList()));
     }
 }

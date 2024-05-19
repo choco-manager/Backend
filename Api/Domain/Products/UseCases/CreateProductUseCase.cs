@@ -1,5 +1,6 @@
 ﻿using Api.Common;
 using Api.Data;
+using Api.Data.Enums;
 using Api.Data.Models;
 using Api.Domain.Products.Data;
 using Api.Extensions;
@@ -35,8 +36,6 @@ public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductReque
         var product = new Product
         {
             Title = req.Title,
-            CostPrice = req.CostPrice,
-            RetailPrice = req.RetailPrice,
             StockBalance = req.StockBalance,
             IsBulk = req.IsBulk,
             Tags = tags,
@@ -44,8 +43,26 @@ public class CreateProductUseCase(AppDbContext db) : IUseCase<CreateProductReque
         };
 
         await db.Products.AddAsync(product, ct);
+
+        var retailPrice = new PriceHistory
+        {
+            ProductId = product.Id,
+            Price = req.RetailPrice,
+            EffectiveTimestamp = DateTime.UtcNow.ToUniversalTime(),
+            PriceType = PriceType.Retail
+        };
+
+        var costPrice = new PriceHistory
+        {
+            ProductId = product.Id,
+            Price = req.CostPrice,
+            EffectiveTimestamp = DateTime.UtcNow.ToUniversalTime(),
+            PriceType = PriceType.Cost
+        };
+
+        await db.PriceHistory.AddRangeAsync(retailPrice, costPrice);
         await db.SaveChangesAsync(ct);
 
-        return Result<ProductDto>.Created(ProductMapper.ProductToDto(product), "/products");
+        return Result<ProductDto>.Created(ProductMapper.ProductToDto(product, [retailPrice, costPrice]), "/products");
     }
 }

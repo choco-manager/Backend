@@ -1,5 +1,6 @@
 ﻿using Api.Common;
 using Api.Data;
+using Api.Data.Enums;
 using Api.Data.Models;
 using Api.Domain.Products.Data;
 using Api.Extensions;
@@ -49,12 +50,27 @@ public class UpdateProductUseCase(AppDbContext db) : IUseCase<UpdateProductReque
 
         if (req.CostPrice is not null)
         {
-            product.CostPrice = req.CostPrice.Value;
+            var costPrice = new PriceHistory
+            {
+                ProductId = product.Id,
+                Price = req.CostPrice!.Value,
+                EffectiveTimestamp = DateTime.UtcNow.ToUniversalTime(),
+                PriceType = PriceType.Cost
+            };
+            await db.PriceHistory.AddAsync(costPrice, ct);
+
         }
 
         if (req.RetailPrice is not null)
         {
-            product.RetailPrice = req.RetailPrice.Value;
+            var retailPrice = new PriceHistory
+            {
+                ProductId = product.Id,
+                Price = req.RetailPrice!.Value,
+                EffectiveTimestamp = DateTime.UtcNow.ToUniversalTime(),
+                PriceType = PriceType.Retail
+            };
+            await db.PriceHistory.AddAsync(retailPrice, ct);
         }
 
         if (req.Tags is not null)

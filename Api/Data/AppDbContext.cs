@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<RestorationToken> RestorationTokens => Set<RestorationToken>();
     public virtual DbSet<Product> Products => Set<Product>();
     public virtual DbSet<ProductTag> ProductTags => Set<ProductTag>();
+    public virtual DbSet<PriceHistory> PriceHistory => Set<PriceHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

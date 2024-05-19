@@ -27,7 +27,8 @@ public class RequestPasswordRestorationUseCase(AppDbContext db, SecurityConfigur
         {
             Token = restorationToken,
             Salt = salt,
-            IsValid = true
+            IsValid = true,
+            ValidUntil = DateTime.UtcNow.AddMinutes(3).ToUniversalTime(),
         };
 
         await db.RestorationTokens.AddAsync(token, ct);

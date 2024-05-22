@@ -16,4 +16,7 @@ public class SwaggerTags
 
     [TagDescription("Operations, related to updating stock balance of products")]
     public const string Stocktaking = "Stocktaking";
+
+    [TagDescription("Operations, related to orders manipulation")]
+    public const string Orders = "Orders";
 }

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="3.4.0"></a>
+## [3.4.0](https://www.github.com/choco-manager/Backend/releases/tag/v3.4.0) (2024-05-22)
+
+### Features
+
+* add endpoint to soft delete orders ([92fbe03](https://www.github.com/choco-manager/Backend/commit/92fbe030374e42343dab1c86a15b1a02040943e0))
+
 <a name="3.3.0"></a>
 ## [3.3.0](https://www.github.com/choco-manager/Backend/releases/tag/v3.3.0) (2024-05-22)
 

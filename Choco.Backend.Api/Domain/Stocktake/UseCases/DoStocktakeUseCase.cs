@@ -10,7 +10,7 @@ public class DoStocktakeUseCase(AppDbContext db) : IUseCase<DoStocktakeRequest, 
 {
     public async Task<Result<DoStocktakeResponse>> Execute(DoStocktakeRequest req, CancellationToken ct = default)
     {
-        var product = await db.Products.Where(e => e.Id == req.ProductId).FirstOrDefaultAsync(ct);
+        var product = await db.Products.Where(e => e.Id == req.Id).FirstOrDefaultAsync(ct);
 
         if (product is null)
         {

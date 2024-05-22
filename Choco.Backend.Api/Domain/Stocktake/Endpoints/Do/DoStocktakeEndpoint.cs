@@ -10,7 +10,7 @@ public class DoStocktakeEndpoint(DoStocktakeUseCase doStocktakeUseCase): Endpoin
 {
     public override void Configure()
     {
-        Post("stocktaking");
+        Post("stocktaking/{id}");
         Version(3);
         Options(x => x.WithTags(SwaggerTags.Stocktaking));
         DontThrowIfValidationFails();

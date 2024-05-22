@@ -2,6 +2,6 @@
 
 public class DoStocktakeRequest
 {
-    public Guid ProductId { get; set; }
+    public Guid Id { get; set; }
     public int StockBalance { get; set; }
 }

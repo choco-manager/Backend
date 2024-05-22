@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="3.1.0"></a>
+## [3.1.0](https://www.github.com/choco-manager/Backend/releases/tag/v3.1.0) (2024-05-22)
+
+### Features
+
+* add endpoint to get all orders in paged format ([04a3f5d](https://www.github.com/choco-manager/Backend/commit/04a3f5d0832f5440f56af76bdb2f6aff5b010b88))
+
+### Bug Fixes
+
+* replace `List<ProductDto>` with more extensible `ListOfProducts` ([fd29ef4](https://www.github.com/choco-manager/Backend/commit/fd29ef43b02d0a3ed8af5e4bfa9389b4549d60dc))
+
 <a name="3.0.0"></a>
 ## [3.0.0](https://www.github.com/choco-manager/Backend/releases/tag/v3.0.0) (2024-05-22)
 

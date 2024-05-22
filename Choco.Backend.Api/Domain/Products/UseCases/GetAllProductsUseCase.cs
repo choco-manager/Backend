@@ -10,13 +10,12 @@ public class GetAllProductsUseCase(AppDbContext db) : IPagedUseCase<PagedRequest
 {
     public async Task<PagedResult<ListOfProducts>> Execute(PagedRequest req, CancellationToken ct)
     {
-        var skip = (req.Page - 1) * req.PageSize;
 
         var products = await db.Products
             .Include(e => e.Tags)
             .Include(e => e.Prices)
             .OrderByDescending(p => p.Prices.OrderByDescending(ph => ph.EffectiveTimestamp).First().EffectiveTimestamp)
-            .Skip(skip)
+            .Skip(req.Skip)
             .Take(req.PageSize)
             .Select(e => ProductMapper
                 .ProductToDto(e, e.Prices

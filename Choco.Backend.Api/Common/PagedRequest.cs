@@ -10,5 +10,7 @@ public class PagedRequest
     [QueryParam]
     [BindFrom("page")]
     public int Page { get; set; }
-    
+
+    public int Skip => (Page - 1) * PageSize;
+
 }

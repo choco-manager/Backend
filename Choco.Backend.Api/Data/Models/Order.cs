@@ -12,4 +12,5 @@ public class Order : BaseModel
     public PaymentStatus PaymentStatus { get; set; }
     public required Address ShippingAddress { get; set; }
     public decimal TotalAmount { get; set; }
+    public bool IdDeleted { get; set; }
 }

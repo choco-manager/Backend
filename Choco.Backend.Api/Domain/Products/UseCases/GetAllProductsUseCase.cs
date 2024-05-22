@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Choco.Backend.Api.Domain.Products.UseCases;
 
-public class GetAllProductsUseCase(AppDbContext db) : IPagedUseCase<PagedRequest, List<ProductDto>>
+public class GetAllProductsUseCase(AppDbContext db) : IPagedUseCase<PagedRequest, ListOfProducts>
 {
-    public async Task<PagedResult<List<ProductDto>>> Execute(PagedRequest req, CancellationToken ct)
+    public async Task<PagedResult<ListOfProducts>> Execute(PagedRequest req, CancellationToken ct)
     {
         var skip = (req.Page - 1) * req.PageSize;
 
@@ -29,9 +29,10 @@ public class GetAllProductsUseCase(AppDbContext db) : IPagedUseCase<PagedRequest
         var totalRecords = await db.Products.CountAsync(ct);
         var totalPages = (int)Math.Ceiling((double)totalRecords / req.PageSize);
 
-        return Result<List<ProductDto>>.Success(products).ToPagedResult(new PagedInfo(
-            req.Page,
-            req.PageSize,
-            totalPages, totalRecords));
+        return Result.Success(new ListOfProducts
+            {
+                Products = products
+            }
+        ).ToPagedResult(new PagedInfo(req.Page, req.PageSize, totalPages, totalRecords));
     }
 }

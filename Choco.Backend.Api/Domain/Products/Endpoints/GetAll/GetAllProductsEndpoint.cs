@@ -7,7 +7,7 @@ using FastEndpoints;
 
 namespace Choco.Backend.Api.Domain.Products.Endpoints.GetAll;
 
-public class GetAllProductsEndpoint(GetAllProductsUseCase getAllProductsUseCase): Endpoint<PagedRequest, PagedResult<List<ProductDto>>>
+public class GetAllProductsEndpoint(GetAllProductsUseCase getAllProductsUseCase): Endpoint<PagedRequest, PagedResult<ListOfProducts>>
 {
     public override void Configure()
     {
@@ -17,7 +17,7 @@ public class GetAllProductsEndpoint(GetAllProductsUseCase getAllProductsUseCase)
         DontThrowIfValidationFails();
     }
 
-    public override async Task<PagedResult<List<ProductDto>>> ExecuteAsync(PagedRequest req, CancellationToken ct)
+    public override async Task<PagedResult<ListOfProducts>> ExecuteAsync(PagedRequest req, CancellationToken ct)
     {
         return await getAllProductsUseCase.Execute(req, ct);
     }

@@ -1,0 +1,53 @@
+﻿name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        if: ${{ !env.ACT }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x
+
+      - name: Restore dependencies
+        if: ${{ !env.ACT }}
+        run: dotnet restore
+
+      - name: Build
+        if: ${{ !env.ACT }}
+        run: dotnet build --no-restore
+
+      - name: Get Release Notes
+        id: release_notes
+        run: |
+          cd Choco.Backend.Api
+          changelog_file="CHANGELOG.md"
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          tag_section=$(awk "/<a name=\"${latest_tag#v}\"><\/a>/{flag=1;next}/<a name=\"/{flag=0}flag" $changelog_file)
+          title=$(echo "$tag_section" | grep -oP '(?<=## \[).*?(?=\])')
+          date=$(echo "$tag_section" | grep -oP '\(\d{4}-\d{2}-\d{2}\)' | sed 's/[()]//g')
+          body=$(echo "$tag_section" | sed -n '/### /,$p')
+          echo "::set-output name=title::$title ($date)"
+          echo "::set-output name=body::$body"
+
+      - name: Create Release
+        if: ${{ !env.ACT }}
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          name: ${{ steps.release_notes.outputs.title }}
+          body: ${{ steps.release_notes.outputs.body }}
+          prerelease: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref != 'refs/tags/v' }}

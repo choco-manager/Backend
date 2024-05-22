@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="3.3.0"></a>
+## [3.3.0](https://www.github.com/choco-manager/Backend/releases/tag/v3.3.0) (2024-05-22)
+
+### Features
+
+* add endpoint to get order by id ([03e1755](https://www.github.com/choco-manager/Backend/commit/03e17557b561b0912c45ae64ec584944aae7f4cb))
+
 <a name="3.2.0"></a>
 ## [3.2.0](https://www.github.com/choco-manager/Backend/releases/tag/v3.2.0) (2024-05-22)
 

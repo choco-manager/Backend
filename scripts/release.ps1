@@ -35,7 +35,7 @@ $commitMessage = "chore(release): $versionWithoutPrefix"
 & git commit -S -m $commitMessage
 
 # Step 4: Tag this commit with the tag named with prefix "v" (original output of step 1)
-& git tag -a $newVersion
+& git tag -a $newVersion -m $newVersion
 
 # Push the commit and the tag
 & git push origin main --follow-tags

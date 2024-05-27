@@ -66,11 +66,12 @@ jobs:
         id: branch_name
         run: |
           echo $(git branch --contains $GITHUB_SHA)
+          echo $GITHUB_SHA
           BRANCH_NAME=$(git branch --contains $GITHUB_SHA | grep -v "detached" | grep -o '[^ ]*$' | head -n 1)
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
       - name: Create Release
-        if: ${{ !env.ACT }}
+        if: ${{ !env.ACT && steps.branch_name.outputs.BRANCH_NAME != '' }}
         id: create_release
         uses: softprops/action-gh-release@v2
         env:

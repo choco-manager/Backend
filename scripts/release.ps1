@@ -1,6 +1,8 @@
 # Step 1: Get the new version with `git cliff --bumped-version`
 $newVersion = & git cliff --bumped-version
 
+Write-Host $newVersion
+
 # Step 2: Strip "v" prefix from its output
 $versionWithoutPrefix = $newVersion -replace '^v', ''
 
@@ -11,20 +13,8 @@ $csprojPath = "Choco.Backend.Api/Choco.Backend.Api.csproj"
 [xml]$csprojXml = Get-Content $csprojPath
 
 # Find the Version element and update its value
-$versionElement = $csprojXml.Project.PropertyGroup.Version
-if ($versionElement) {
-    $versionElement.InnerText = $versionWithoutPrefix
-} else {
-    # If the Version element doesn't exist, create it
-    $propertyGroup = $csprojXml.Project.PropertyGroup | Where-Object { $_.Version -ne $null }
-    if (-not $propertyGroup) {
-        $propertyGroup = $csprojXml.CreateElement("PropertyGroup")
-        $csprojXml.Project.AppendChild($propertyGroup)
-    }
-    $versionElement = $csprojXml.CreateElement("Version")
-    $versionElement.InnerText = $versionWithoutPrefix
-    $propertyGroup.AppendChild($versionElement)
-}
+$versionElement = $csprojXml.SelectSingleNode("/Project/PropertyGroup/Version")
+$versionElement.InnerText = $versionWithoutPrefix
 
 # Save the updated XML file
 $csprojXml.Save($csprojPath)

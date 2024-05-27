@@ -65,7 +65,7 @@ jobs:
       - name: Get branch name
         id: branch_name
         run: |
-          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          BRANCH_NAME=$(git rev-parse --abbrev-ref $GITHUB_SHA)
           echo $BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY

@@ -28,4 +28,4 @@ $commitMessage = "chore(release): $versionWithoutPrefix"
 & git tag -a $newVersion -m $newVersion
 
 # Push the commit and the tag
-& git push origin main --follow-tags
+& git up --follow-tags

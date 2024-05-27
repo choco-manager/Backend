@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>3.5.7</Version>
+    <Version>3.5.8</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.Result" Version="9.0.1" />

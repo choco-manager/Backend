@@ -53,11 +53,15 @@ commit_parsers = [
   { message = "^.*: support", group = "Added" },
   { message = "^.*: remove", group = "Removed" },
   { message = "^.*: delete", group = "Removed" },
+  { message = "^.*: deprecated", group = "Deprecated" },
+  { message = "^ci", group = "Miscellaneous" },
+  { message = "^config", group = "Miscellaneous" },
+  { message = "^db", group = "Database changes" },
   { message = "^test", group = "Fixed" },
   { message = "^fix", group = "Fixed" },
   { message = "^.*: fix", group = "Fixed" },
-  { message = "^.*", group = "Changed" },
-  { message = "^chore(release):.*",  skip=true}
+  { message = "^chore(release):.*",  skip=true},
+  { message = "^.*", group = "Changed" }
 ]
 # protect breaking changes from being skipped due to matching a skipping commit_parser
 protect_breaking_commits = false

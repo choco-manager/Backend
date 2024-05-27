@@ -62,15 +62,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Get branch name
-        id: branch_name
-        run: |
-          BRANCH_NAME=$(git show-branch --current | cut -d "[" -f2 | cut -d "]" -f1)
-          echo $BRANCH_NAME
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          echo "$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
       - name: Create Release
-        if: ${{ !env.ACT && steps.branch_name.outputs.BRANCH_NAME != '' }}
+        if: ${{ !env.ACT }}
         id: create_release
         uses: softprops/action-gh-release@v2
         env:
@@ -79,5 +72,3 @@ jobs:
           tag_name: ${{ github.ref }}
           body: ${{ needs.changelog.outputs.release_body }}
           name: "Версия ${{ needs.changelog.outputs.version }}"
-          prerelease: ${{ steps.branch_name.outputs.BRANCH_NAME != 'master' }}
-          latest: ${{ steps.branch_name.outputs.BRANCH_NAME == 'master' }}

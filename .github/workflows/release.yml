@@ -65,9 +65,8 @@ jobs:
       - name: Get branch name
         id: branch_name
         run: |
-          echo $(git branch --contains $GITHUB_SHA)
-          echo $GITHUB_SHA
-          BRANCH_NAME=$(git branch --contains $GITHUB_SHA | grep -v "detached" | grep -o '[^ ]*$' | head -n 1)
+          BRANCH_NAME=$(git rev-parse -q --abbrev-ref $(git merge-base --is-ancestor $GITHUB_SHA HEAD) 2>/dev/null || echo "HEAD")
+          echo $BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
       - name: Create Release

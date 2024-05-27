@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
         if: ${{ !env.ACT }}
@@ -65,7 +65,8 @@ jobs:
       - name: Get branch name
         id: branch_name
         run: |
-          BRANCH_NAME=$(git branch --contains ${GITHUB_SHA} | grep -v "detached" | grep -o '[^ ]*$' | head -n 1)
+          echo $(git branch --contains $GITHUB_SHA)
+          BRANCH_NAME=$(git branch --contains $GITHUB_SHA | grep -v "detached" | grep -o '[^ ]*$' | head -n 1)
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
       - name: Create Release

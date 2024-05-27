@@ -61,6 +61,7 @@ jobs:
         run: |
           BRANCH_NAME=$(git branch --contains ${GITHUB_SHA} | grep -v "detached" | grep -o '[^ ]*$' | head -n 1)
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
       - name: Create Release
         if: ${{ !env.ACT }}
         id: create_release
@@ -69,6 +70,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          name: ${{ needs.changelog.outputs.release_body }}
-          body: "Версия ${{ needs.changelog.outputs.version }}"
+          body: ${{ needs.changelog.outputs.release_body }}
+          name: "Версия ${{ needs.changelog.outputs.version }}"
           prerelease: ${{ steps.branch_name.outputs.BRANCH_NAME != 'master' }}
+          latest: ${{ steps.branch_name.outputs.BRANCH_NAME == 'master' }}

@@ -11,7 +11,6 @@ public class PingEndpoint : Endpoint<EmptyRequest, Result<string>>
         Get("/ping");
         Version(3);
         Options(x => x.WithTags(SwaggerTags.Internal));
-        AllowAnonymous();
     }
 
     public override async Task<Result<string>> ExecuteAsync(EmptyRequest req, CancellationToken ct)

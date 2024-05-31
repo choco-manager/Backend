@@ -7,7 +7,12 @@ Write-Host $newVersion
 $versionWithoutPrefix = $newVersion -replace '^v', ''
 
 # Path to the csproj file
-$csprojPath = "Choco.Backend.Api/Choco.Backend.Api.csproj"
+try {
+    $csprojPath = Get-Item -Path "Choco.Backend.Api/Choco.Backend.Api.csproj" -ErrorAction Stop
+    $item.FullName
+} catch {
+    Write-Host "The specified file does not exist."
+}
 
 # Load the XML file
 [xml]$csprojXml = Get-Content $csprojPath
@@ -17,7 +22,14 @@ $versionElement = $csprojXml.SelectSingleNode("/Project/PropertyGroup/Version")
 $versionElement.InnerText = $versionWithoutPrefix
 
 # Save the updated XML file
-$csprojXml.Save($csprojPath)
+try
+{
+    $csprojXml.Save($csprojPath)
+}
+catch [System.Exception] {
+    "Error while saving file occured"
+    exit 1
+}
 
 # Step 3: Create a commit named "chore(release): ${version-without-prefix}" with commit signing enabled
 & git add $csprojPath

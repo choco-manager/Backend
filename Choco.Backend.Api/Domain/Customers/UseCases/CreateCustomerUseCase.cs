@@ -34,6 +34,6 @@ public class CreateCustomerUseCase(AppDbContext db, NormalizeAddressUseCase norm
         await db.Customers.AddAsync(customer, ct);
         await db.SaveChangesAsync(ct);
 
-        return Result.Success();
+        return Result.Success(new IdModel {Id = customer.Id});
     }
 }

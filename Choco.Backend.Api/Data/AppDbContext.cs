@@ -18,6 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<Address> Addresses => Set<Address>();
     public virtual DbSet<City> Cities => Set<City>();
     public virtual DbSet<Customer> Customers => Set<Customer>();
+    public virtual DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

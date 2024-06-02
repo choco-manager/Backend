@@ -59,6 +59,8 @@ public class CreateOrderUseCase(AppDbContext db, CreateNotificationUseCase creat
 
             if (data is null) continue;
 
+            data.StockBalance -= productRequest.Amount;
+
             var product = new OrderedProduct
             {
                 Order = order,

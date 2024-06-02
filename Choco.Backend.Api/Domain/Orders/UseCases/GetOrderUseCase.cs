@@ -22,7 +22,6 @@ public class GetOrderUseCase(AppDbContext db) : IUseCase<IdModel, OrderDto>
                 ToBeDeliveredAt = o.ToBeDeliveredAt,
                 OrderStatus = o.OrderStatus,
                 PaymentStatus = o.PaymentStatus,
-                ShippingAddress = o.ShippingAddress,
                 TotalAmount = o.TotalAmount,
                 Products = o.Products.Select(op => new OrderedProductDto
                 {

@@ -6,6 +6,6 @@ namespace Choco.Backend.Api.Domain.Orders.Data;
 public class CreateOrderRequest
 {
     public DateTime ToBeDeliveredAt { get; set; }
-    public required Address ShippingAddress { get; set; }
+    public Guid CustomerId { get; set; }
     public required ICollection<CreateOrderProductRequest> Products { get; set; }
 }

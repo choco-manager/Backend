@@ -8,14 +8,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Choco.Backend.Api.Domain.Orders.UseCases;
 
-public class CreateOrderUseCase(AppDbContext db): IUseCase<CreateOrderRequest, IdModel>
+public class CreateOrderUseCase(AppDbContext db) : IUseCase<CreateOrderRequest, IdModel>
 {
     public async Task<Result<IdModel>> Execute(CreateOrderRequest req, CancellationToken ct = default)
     {
+        var customer = await db.Customers
+            .Where(e => e.Id == req.CustomerId)
+            .FirstOrDefaultAsync(ct);
+
+        if (customer is null)
+        {
+            return Result.NotFound(nameof(customer));
+        }
+
         var order = new Order
         {
             Products = [],
-            ShippingAddress = req.ShippingAddress,
+            Customer = customer,
             OrderedAt = DateTime.UtcNow.ToUniversalTime(),
             OrderStatus = OrderStatus.Pending,
             PaymentStatus = PaymentStatus.Pending,
@@ -32,14 +41,14 @@ public class CreateOrderUseCase(AppDbContext db): IUseCase<CreateOrderRequest, I
                 .FirstOrDefaultAsync(ct);
 
             if (data is null) continue;
-            
+
             var product = new OrderedProduct
             {
                 Order = order,
                 Product = data,
                 Amount = productRequest.Amount
             };
-                
+
             products.Add(product);
         }
 

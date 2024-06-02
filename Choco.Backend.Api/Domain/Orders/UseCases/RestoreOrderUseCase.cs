@@ -19,7 +19,7 @@ public class RestoreOrderUseCase(AppDbContext db): IUseCase<IdModel, EmptyRespon
             return Result.NotFound(nameof(order));
         }
 
-        order.IdDeleted = false;
+        order.IsDeleted = false;
 
         await db.SaveChangesAsync(ct);
 

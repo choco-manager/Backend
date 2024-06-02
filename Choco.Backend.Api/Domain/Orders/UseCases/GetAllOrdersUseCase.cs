@@ -23,7 +23,6 @@ public class GetAllOrdersUseCase(AppDbContext db) : IPagedUseCase<PagedRequest, 
                 ToBeDeliveredAt = o.ToBeDeliveredAt,
                 OrderStatus = o.OrderStatus,
                 PaymentStatus = o.PaymentStatus,
-                ShippingAddress = o.ShippingAddress,
                 TotalAmount = o.TotalAmount,
                 Products = o.Products.Select(op => new OrderedProductDto
                 {

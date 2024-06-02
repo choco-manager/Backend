@@ -11,6 +11,5 @@ public class OrderDto
     public DateTime ToBeDeliveredAt { get; set; }
     public OrderStatus OrderStatus { get; set; }
     public PaymentStatus PaymentStatus { get; set; }
-    public required Address ShippingAddress { get; set; }
     public decimal TotalAmount { get; set; }
 }

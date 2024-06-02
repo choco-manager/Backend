@@ -17,7 +17,7 @@ public class SoftDeleteOrderUseCase(AppDbContext db) : IUseCase<IdModel, EmptyRe
             return Result.NotFound(nameof(order));
         }
 
-        order.IdDeleted = true;
+        order.IsDeleted = true;
 
         await db.SaveChangesAsync(ct);
 

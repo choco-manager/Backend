@@ -4,6 +4,8 @@ using Choco.Backend.Api.Common;
 using Choco.Backend.Api.Data;
 using Choco.Backend.Api.Data.Enums;
 using Choco.Backend.Api.Data.Models;
+using Choco.Backend.Api.Domain.Notifications.Data;
+using Choco.Backend.Api.Domain.Notifications.UseCases;
 using Choco.Backend.Api.Domain.Orders.Data;
 using FastEndpoints.Security;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,17 @@ public class CreateOrderUseCase(AppDbContext db, CreateNotificationUseCase creat
     public async Task<Result<IdModel>> Execute(ClaimsPrincipal user, CreateOrderRequest req,
         CancellationToken ct = default)
     {
+        var userLogin = user.ClaimValue(ClaimTypes.Name);
+
+        if (userLogin is null)
+        {
+            return Result.Unauthorized();
+        }
+
+        var allUsers = await db.Users
+            .Select(e => e.Id)
+            .ToListAsync(ct);
+
         var customer = await db.Customers
             .Where(e => e.Id == req.CustomerId)
             .FirstOrDefaultAsync(ct);
@@ -57,6 +70,34 @@ public class CreateOrderUseCase(AppDbContext db, CreateNotificationUseCase creat
         }
 
         order.Products = products;
+
+        var newOrderNotificationData = new NotificationData
+        {
+            Notification = new Notification
+            {
+                Title = "Новый заказ",
+                Timestamp = DateTime.UtcNow.ToUniversalTime(),
+                NotificationType = NotificationType.OrderNew,
+                TriggerId = order.Id,
+            },
+            Recipients = allUsers
+        };
+        var orderDeliverySoonNotificationData = new NotificationData
+        {
+            Notification = new Notification
+            {
+                Title = "Приближается срок доставки заказа",
+                Timestamp = (order.ToBeDeliveredAt - DateTime.UtcNow).TotalHours > 2
+                    ? order.ToBeDeliveredAt.AddHours(-2).ToUniversalTime()
+                    : DateTime.UtcNow.ToUniversalTime(),
+                NotificationType = NotificationType.OrderDeliverySoon,
+                TriggerId = order.Id,
+            },
+            Recipients = allUsers
+        };
+
+        _ = createNotificationUseCase.Execute(newOrderNotificationData, ct);
+        _ = createNotificationUseCase.Execute(orderDeliverySoonNotificationData, ct);
 
         await db.SaveChangesAsync(ct);
 

@@ -59,6 +59,10 @@ public static class BuilderExtensions
         builder.Services.Configure<SecurityConfiguration>(builder.Configuration.GetRequiredSection("Security"));
         builder.Services.AddSingleton(resolver =>
             resolver.GetRequiredService<IOptions<SecurityConfiguration>>().Value);
+        
+        builder.Services.Configure<DadataConfiguration>(builder.Configuration.GetRequiredSection("Dadata"));
+        builder.Services.AddSingleton(resolver =>
+            resolver.GetRequiredService<IOptions<DadataConfiguration>>().Value);
 
         return builder;
     }

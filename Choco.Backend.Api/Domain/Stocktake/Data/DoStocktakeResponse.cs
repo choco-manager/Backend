@@ -3,5 +3,5 @@
 public class DoStocktakeResponse
 {
     public required string ProductTitle { get; set; }
-    public int StockBalanceDelta { get; set; }
+    public decimal StockBalanceDelta { get; set; }
 }

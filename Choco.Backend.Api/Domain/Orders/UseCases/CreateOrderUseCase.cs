@@ -1,16 +1,20 @@
-﻿using Ardalis.Result;
+﻿using System.Security.Claims;
+using Ardalis.Result;
 using Choco.Backend.Api.Common;
 using Choco.Backend.Api.Data;
 using Choco.Backend.Api.Data.Enums;
 using Choco.Backend.Api.Data.Models;
 using Choco.Backend.Api.Domain.Orders.Data;
+using FastEndpoints.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace Choco.Backend.Api.Domain.Orders.UseCases;
 
-public class CreateOrderUseCase(AppDbContext db) : IUseCase<CreateOrderRequest, IdModel>
+public class CreateOrderUseCase(AppDbContext db, CreateNotificationUseCase createNotificationUseCase)
+    : IAuthorizedUseCase<CreateOrderRequest, IdModel>
 {
-    public async Task<Result<IdModel>> Execute(CreateOrderRequest req, CancellationToken ct = default)
+    public async Task<Result<IdModel>> Execute(ClaimsPrincipal user, CreateOrderRequest req,
+        CancellationToken ct = default)
     {
         var customer = await db.Customers
             .Where(e => e.Id == req.CustomerId)

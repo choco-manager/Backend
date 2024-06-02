@@ -19,6 +19,6 @@ public class CreateOrderEndpoint(CreateOrderUseCase useCase): Endpoint<CreateOrd
 
     public override async Task<Result<IdModel>> ExecuteAsync(CreateOrderRequest req, CancellationToken ct)
     {
-        return await useCase.Execute(req, ct);
+        return await useCase.Execute(User, req, ct);
     }
 }

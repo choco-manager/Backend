@@ -8,4 +8,9 @@ public class Address : BaseModel
     public required string Street { get; set; }
     public required string Building { get; set; }
     public int Entrance { get; set; }
+
+    public override string ToString()
+    {
+        return $"{City.Name}, {Street}, {Building}";
+    }
 }

@@ -17,6 +17,22 @@ public class SoftDeleteOrderUseCase(AppDbContext db) : IUseCase<IdModel, EmptyRe
             return Result.NotFound(nameof(order));
         }
 
+        var orderItems = await db.OrderedProducts
+            .Where(e => e.OrderId == order.Id)
+            .ToListAsync(ct);
+
+        foreach (var item in orderItems)
+        {
+            var product = await db.Products
+                .Where(e => e.Id == item.ProductId)
+                .FirstOrDefaultAsync(ct);
+
+            if (product is not null)
+            {
+                product.StockBalance += item.Amount;
+            }
+        }
+
         order.IsDeleted = true;
 
         await db.SaveChangesAsync(ct);

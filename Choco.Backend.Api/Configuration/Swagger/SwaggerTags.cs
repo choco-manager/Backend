@@ -19,4 +19,7 @@ public class SwaggerTags
 
     [TagDescription("Operations, related to orders manipulation")]
     public const string Orders = "Orders";
+
+    [TagDescription("Operations, related to accessing notifications")]
+    public const string Notifications = "Notifications";
 }

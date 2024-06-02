@@ -59,7 +59,7 @@ public static class BuilderExtensions
         builder.Services.Configure<SecurityConfiguration>(builder.Configuration.GetRequiredSection("Security"));
         builder.Services.AddSingleton(resolver =>
             resolver.GetRequiredService<IOptions<SecurityConfiguration>>().Value);
-        
+
         builder.Services.Configure<DadataConfiguration>(builder.Configuration.GetRequiredSection("Dadata"));
         builder.Services.AddSingleton(resolver =>
             resolver.GetRequiredService<IOptions<DadataConfiguration>>().Value);
@@ -82,7 +82,9 @@ public static class BuilderExtensions
                     .Where(iface => iface.IsGenericType)
                     .Where(iface =>
                         iface.GetGenericTypeDefinition() == typeof(IUseCase<,>) ||
-                        iface.GetGenericTypeDefinition() == typeof(IPagedUseCase<,>))
+                        iface.GetGenericTypeDefinition() == typeof(IPagedUseCase<,>) ||
+                        iface.GetGenericTypeDefinition() == typeof(IAuthorizedUseCase<,>)
+                    )
             })
             .SelectMany(t => t.services, (t, service) => new { service, t.type });
 

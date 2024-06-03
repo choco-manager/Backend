@@ -1,6 +1,7 @@
 using Choco.Backend.Api.Extensions;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Hangfire;
 using Serilog;
 using SerilogTracing;
 
@@ -33,6 +34,7 @@ try
         .ConfigureFastEndpoints()
         .ConfigureSwaggerGen()
         .MigrateDatabase()
+        .UseHangfireDashboard()
         .UseSerilogRequestLogging();
 
     await app.RegisterRecurringTasks();

@@ -8,6 +8,7 @@ using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -73,8 +74,14 @@ public static class BuilderExtensions
         builder.Services.AddHangfire(x =>
         {
             x.UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings();
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(o =>
+                {
+                    o.UseNpgsqlConnection(() => builder.Configuration.GetConnectionString("Hangfire"));
+                });
         });
+
+        builder.Services.AddHangfireServer(x => x.SchedulePollingInterval = TimeSpan.FromSeconds(30));
 
         return builder;
     }

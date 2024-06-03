@@ -25,4 +25,7 @@ public class SwaggerTags
 
     [TagDescription("Operations, related to customers manipulation")]
     public const string Customers = "Customers";
+
+    [TagDescription("Operations, related to procurement manipulation")]
+    public const string Procurements = "Procurements";
 }

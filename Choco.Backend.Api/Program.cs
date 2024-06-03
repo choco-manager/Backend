@@ -35,6 +35,8 @@ try
         .MigrateDatabase()
         .UseSerilogRequestLogging();
 
+    await app.RegisterRecurringTasks();
+
     FirebaseApp.Create(new AppOptions
     {
         Credential = GoogleCredential.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,

@@ -1,9 +1,15 @@
 ﻿using Choco.Backend.Api.Common.Processors;
 using Choco.Backend.Api.Data;
+using Choco.Backend.Api.Data.Enums;
+using Choco.Backend.Api.Data.Models;
+using Choco.Backend.Api.Domain.Notifications.Data;
+using Choco.Backend.Api.Domain.Notifications.UseCases;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Order = FastEndpoints.Order;
 
 namespace Choco.Backend.Api.Extensions;
 
@@ -61,6 +67,35 @@ public static class ApplicationExtensions
             "Found pending migrations: {PendingMigrations}, migrating...",
             pendingMigrations);
         context.Database.Migrate();
+
+        return app;
+    }
+
+    public static async Task<WebApplication> RegisterRecurringTasks(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var jobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+        var createNotificationUseCase = scope.ServiceProvider.GetRequiredService<CreateNotificationUseCase>();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var recipients = await db.Users.Select(e => e.Id).ToListAsync();
+
+        var notification = new NotificationData
+        {
+            Notification = new Notification
+            {
+                Title = "Пора провести ревизию!",
+                NotificationType = NotificationType.DoStocktake,
+                Timestamp = DateTime.UtcNow,
+                TriggerId = Guid.Empty
+            },
+            Recipients = recipients
+        };
+
+        jobManager.AddOrUpdate("do-stocktaking-notification",
+            () => createNotificationUseCase.Execute(notification, default),
+            "30 15 20 * *"
+        );
 
         return app;
     }

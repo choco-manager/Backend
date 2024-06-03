@@ -20,6 +20,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public virtual DbSet<Customer> Customers => Set<Customer>();
     public virtual DbSet<Notification> Notifications => Set<Notification>();
     public virtual DbSet<NotificationReadStatus> NotificationsReadStatus => Set<NotificationReadStatus>();
+    public virtual DbSet<Procurement> Procurements => Set<Procurement>();
+    public virtual DbSet<ProcuredProduct> ProcuredProducts => Set<ProcuredProduct>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,6 +98,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ]);
 
         modelBuilder.Entity<OrderedProduct>().HasKey(e => new { e.OrderId, e.ProductId });
+        modelBuilder.Entity<ProcuredProduct>().HasKey(e => new { e.ProcurementId, e.ProductId });
         modelBuilder.Entity<NotificationReadStatus>()
             .HasKey(e => new { e.NotificationId, e.RecipientId });
     }

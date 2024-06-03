@@ -1,9 +1,8 @@
-﻿using Choco.Backend.Api.Domain.Orders.Endpoints.UpdateOrderStatus;
-using FastEndpoints;
+﻿using FastEndpoints;
 
 namespace Choco.Backend.Api.Domain.Orders.Endpoints.UpdatePaymentStatus;
 
-public class UpdatePaymentStatusEndpointSummary : Summary<UpdateOrderStatusEndpoint>
+public class UpdatePaymentStatusEndpointSummary : Summary<UpdatePaymentStatusEndpoint>
 {
     public UpdatePaymentStatusEndpointSummary()
     {

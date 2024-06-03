@@ -8,11 +8,15 @@ using Choco.Backend.Api.Domain.Notifications.Data;
 using Choco.Backend.Api.Domain.Notifications.UseCases;
 using Choco.Backend.Api.Domain.Orders.Data;
 using FastEndpoints.Security;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace Choco.Backend.Api.Domain.Orders.UseCases;
 
-public class CreateOrderUseCase(AppDbContext db, CreateNotificationUseCase createNotificationUseCase)
+public class CreateOrderUseCase(
+    AppDbContext db,
+    CreateNotificationUseCase createNotificationUseCase,
+    IBackgroundJobClient jobClient)
     : IAuthorizedUseCase<CreateOrderRequest, IdModel>
 {
     public async Task<Result<IdModel>> Execute(ClaimsPrincipal user, CreateOrderRequest req,
@@ -98,8 +102,8 @@ public class CreateOrderUseCase(AppDbContext db, CreateNotificationUseCase creat
             Recipients = allUsers
         };
 
-        _ = createNotificationUseCase.Execute(newOrderNotificationData, ct);
-        _ = createNotificationUseCase.Execute(orderDeliverySoonNotificationData, ct);
+        jobClient.Enqueue(() => createNotificationUseCase.Execute(newOrderNotificationData, ct));
+        jobClient.Enqueue(() => createNotificationUseCase.Execute(orderDeliverySoonNotificationData, ct));
 
         await db.SaveChangesAsync(ct);
 

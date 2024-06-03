@@ -1,4 +1,6 @@
 using Choco.Backend.Api.Extensions;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Serilog;
 using SerilogTracing;
 
@@ -31,6 +33,12 @@ try
         .ConfigureSwaggerGen()
         .MigrateDatabase()
         .UseSerilogRequestLogging();
+
+    FirebaseApp.Create(new AppOptions
+    {
+        Credential = GoogleCredential.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+            "firebase.json")),
+    });
 
     app.Run();
     return 0;

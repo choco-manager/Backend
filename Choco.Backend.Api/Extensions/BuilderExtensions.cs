@@ -7,6 +7,7 @@ using Choco.Backend.Api.Domain.Auth.UseCases;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -63,6 +64,17 @@ public static class BuilderExtensions
         builder.Services.Configure<DadataConfiguration>(builder.Configuration.GetRequiredSection("Dadata"));
         builder.Services.AddSingleton(resolver =>
             resolver.GetRequiredService<IOptions<DadataConfiguration>>().Value);
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddHangfire(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddHangfire(x =>
+        {
+            x.UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings();
+        });
 
         return builder;
     }

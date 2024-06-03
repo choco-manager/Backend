@@ -23,6 +23,7 @@ try
         .ConfigureDatabase()
         .ConfigureSwaggerDocument()
         .MapConfiguration()
+        .AddHangfire()
         .AddUseCases();
 
     var app = builder.Build();

@@ -12,6 +12,7 @@
     <PackageReference Include="FastEndpoints.Security" Version="5.25.0" />
     <PackageReference Include="FastEndpoints.Swagger" Version="5.25.0" />
     <PackageReference Include="FirebaseAdmin" Version="3.0.0" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
       <PrivateAssets>all</PrivateAssets>

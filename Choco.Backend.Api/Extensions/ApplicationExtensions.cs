@@ -45,8 +45,9 @@ public static class ApplicationExtensions
 
     public static WebApplication ConfigureSwaggerGen(this WebApplication app)
     {
-        var docPrefix = app.Environment.IsDevelopment() ? "" : "/api";
+        var docPrefix = app.Environment.IsDevelopment() ? string.Empty : "/api";
         var docPath = "/swagger/{documentName}/swagger.json";
+        var scheme = app.Environment.IsDevelopment() ? "http" : "https";
 
         var sb = new StringBuilder();
         sb.Append(docPrefix);
@@ -59,7 +60,7 @@ public static class ApplicationExtensions
                     document.Servers.Clear();
                     document.Servers.Add(new OpenApiServer
                     {
-                        Url = $"{request.Scheme}://{request.Host}{docPrefix}"
+                        Url = $"{scheme}://{request.Host}{docPrefix}"
                     });
                 };
             },

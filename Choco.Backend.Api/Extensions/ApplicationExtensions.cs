@@ -1,4 +1,5 @@
-﻿using Choco.Backend.Api.Common.Processors;
+﻿using System.Text;
+using Choco.Backend.Api.Common.Processors;
 using Choco.Backend.Api.Data;
 using Choco.Backend.Api.Data.Enums;
 using Choco.Backend.Api.Data.Models;
@@ -43,7 +44,24 @@ public static class ApplicationExtensions
 
     public static WebApplication ConfigureSwaggerGen(this WebApplication app)
     {
-        app.UseSwaggerGen(opts => { opts.Path = "/swagger/{documentName}/swagger.json"; });
+        app.UseSwaggerGen(opts =>
+            {
+                var docPrefix = app.Environment.IsDevelopment() ? "" : "/api";
+                var docPath = "/swagger/{documentName}/swagger.json";
+
+                var sb = new StringBuilder();
+                sb.Append(docPrefix);
+                sb.Append(docPath);
+
+                opts.Path = sb.ToString();
+            },
+            uiConfig: opts =>
+            {
+                opts.ServerUrl = app.Environment.IsDevelopment()
+                    ? ""
+                    : app.Configuration.GetRequiredSection("BaseUrl").Value;
+            }
+        );
 
         return app;
     }

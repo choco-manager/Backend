@@ -249,4 +249,5 @@ FodyWeavers.xsd
 *.msp
 
 **/appsettings.Development.json
+**/appsettings.Production.json
 **/firebase.json

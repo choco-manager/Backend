@@ -9,6 +9,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using NSwag;
 using Serilog;
 using Order = FastEndpoints.Order;
 
@@ -44,22 +45,28 @@ public static class ApplicationExtensions
 
     public static WebApplication ConfigureSwaggerGen(this WebApplication app)
     {
+        var docPrefix = app.Environment.IsDevelopment() ? "" : "/api";
+        var docPath = "/swagger/{documentName}/swagger.json";
+
+        var sb = new StringBuilder();
+        sb.Append(docPrefix);
+        sb.Append(docPath);
         app.UseSwaggerGen(opts =>
             {
-                var docPrefix = app.Environment.IsDevelopment() ? "" : "/api";
-                var docPath = "/swagger/{documentName}/swagger.json";
-
-                var sb = new StringBuilder();
-                sb.Append(docPrefix);
-                sb.Append(docPath);
-
                 opts.Path = sb.ToString();
+                opts.PostProcess = (document, request) =>
+                {
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer
+                    {
+                        Url = $"{request.Scheme}://{request.Host}{docPrefix}"
+                    });
+                };
             },
             uiConfig: opts =>
             {
-                opts.ServerUrl = app.Environment.IsDevelopment()
-                    ? ""
-                    : app.Configuration.GetRequiredSection("BaseUrl").Value;
+                opts.Path = $"{docPrefix}/swagger";
+                opts.DocumentPath = sb.ToString();
             }
         );
 

@@ -1,0 +1,46 @@
+﻿name: choco
+
+services:
+  backend:
+    container_name: "choco-main"
+    build:
+      context: .
+      dockerfile: Choco.Backend.Api/Dockerfile
+    networks:
+      - net
+    depends_on:
+      - hangfiredb
+      - chocodb
+    ports:
+      - 8080:8080
+  
+  chocodb:
+    container_name: "choco-db"
+    image: "postgres:16"
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: postgres
+      POSTGRES_DATABASE: choco
+    volumes:
+      - choco-db-data:/var/lib/postgresql/data
+    networks:
+      - net
+  
+  hangfiredb:
+    container_name: "hangfire-db"
+    image: "postgres:16"
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: postgres
+      POSTGRES_DATABASE: hangfire
+    volumes:
+      - hangfire-db-data:/var/lib/postgresql/data
+    networks:
+      - net
+
+volumes:
+  choco-db-data: { }
+  hangfire-db-data: { }
+
+networks:
+  net: { }

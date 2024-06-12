@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>3.13.1</Version>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.Result" Version="9.0.1" />
@@ -30,5 +31,10 @@
     <PackageReference Include="SerilogTracing" Version="1.1.0" />
     <PackageReference Include="SerilogTracing.Expressions" Version="1.1.0" />
     <PackageReference Include="SerilogTracing.Instrumentation.AspNetCore" Version="1.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 </Project>

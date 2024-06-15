@@ -11,4 +11,6 @@ public class PriceHistory : BaseModel
     public DateTime EffectiveTimestamp { get; set; }
     public decimal Price { get; set; }
     public PriceType PriceType { get; set; }
+
+    public static decimal operator * (PriceHistory a, decimal b) => a.Price * b;
 }

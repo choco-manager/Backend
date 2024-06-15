@@ -55,15 +55,23 @@ public class CreateOrderUseCase(
         await db.Orders.AddAsync(order, ct);
         List<OrderedProduct> products = [];
 
+        var subTotal = 0m;
+
         foreach (var productRequest in req.Products)
         {
             var data = await db.Products
                 .Where(e => e.Id == productRequest.Product)
+                .Include(e => e.Prices)
                 .FirstOrDefaultAsync(ct);
 
             if (data is null) continue;
 
             data.StockBalance -= productRequest.Amount;
+
+            var price = data.Prices
+                .Where(e => e.PriceType == PriceType.Retail)
+                .OrderByDescending(ph => ph.EffectiveTimestamp)
+                .First();
 
             var product = new OrderedProduct
             {
@@ -73,9 +81,11 @@ public class CreateOrderUseCase(
             };
 
             products.Add(product);
+            subTotal += price * productRequest.Amount;
         }
 
         order.Products = products;
+        order.TotalAmount = subTotal;
 
         var newOrderNotificationData = new NotificationData
         {

@@ -7,7 +7,7 @@ using FastEndpoints;
 
 namespace Choco.Backend.Api.Domain.Orders.Endpoints.Get;
 
-public class GetOrderEndpoint(GetOrderUseCase useCase): Endpoint<IdModel, Result<OrderDto>>
+public class GetOrderEndpoint(GetOrderUseCase useCase) : Endpoint<IdModel, Result<ExtendedOrderDto>>
 {
     public override void Configure()
     {
@@ -17,7 +17,7 @@ public class GetOrderEndpoint(GetOrderUseCase useCase): Endpoint<IdModel, Result
         DontThrowIfValidationFails();
     }
 
-    public override async Task<Result<OrderDto>> ExecuteAsync(IdModel req, CancellationToken ct)
+    public override async Task<Result<ExtendedOrderDto>> ExecuteAsync(IdModel req, CancellationToken ct)
     {
         return await useCase.Execute(req, ct);
     }

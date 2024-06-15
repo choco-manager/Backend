@@ -7,15 +7,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Choco.Backend.Api.Domain.Orders.UseCases;
 
-public class GetOrderUseCase(AppDbContext db) : IUseCase<IdModel, OrderDto>
+public class GetOrderUseCase(AppDbContext db) : IUseCase<IdModel, ExtendedOrderDto>
 {
-    public async Task<Result<OrderDto>> Execute(IdModel req, CancellationToken ct = default)
+    public async Task<Result<ExtendedOrderDto>> Execute(IdModel req, CancellationToken ct = default)
     {
         var order = await db.Orders
             .Where(e => e.Id == req.Id)
             .Include(e => e.Products)
             .ThenInclude(e => e.Product)
-            .Select(o => new OrderDto
+            .Select(o => new ExtendedOrderDto
             {
                 Id = o.Id,
                 OrderedAt = o.OrderedAt,

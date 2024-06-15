@@ -6,7 +6,6 @@ namespace Choco.Backend.Api.Domain.Orders.Data;
 public class OrderDto
 {
     public Guid Id { get; set; }
-    public required ICollection<OrderedProductDto> Products { get; set; }
     public DateTime OrderedAt { get; set; }
     public DateTime ToBeDeliveredAt { get; set; }
     public OrderStatus OrderStatus { get; set; }
